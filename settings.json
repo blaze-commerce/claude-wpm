@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow_bash": true,
+    "allow_file_edit": true,
+    "allow_file_write": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/PreToolUse/block-dangerous-commands.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/PreToolUse/block-protected-files.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
