@@ -51,6 +51,12 @@ PREMIUM_PATTERNS=(
     "^shortpixel-image-optimiser$"
 )
 
+# Helper function to find latest zip file (SC2012 fix - use find instead of ls)
+find_latest_zip() {
+    local dir="$1"
+    find "$dir" -maxdepth 1 -name "*.zip" -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
+}
+
 # Check requirements
 check_requirements() {
     local missing=0
@@ -88,7 +94,7 @@ sync_repo() {
         cd "$WP_ROOT"
     else
         log_info "Cloning repository..."
-        rm -rf "$CACHE_DIR"
+        rm -rf "${CACHE_DIR:?}"
         git clone --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" "$CACHE_DIR"
     fi
 
@@ -118,8 +124,9 @@ list_plugins() {
                 continue
             fi
 
-            # Get repo version from latest zip
-            latest_zip=$(ls -t "$plugin_dir"/*.zip 2>/dev/null | head -1)
+            # Get repo version from latest zip (using find instead of ls)
+            local latest_zip
+            latest_zip=$(find_latest_zip "$plugin_dir")
             if [ -n "$latest_zip" ]; then
                 repo_version=$(basename "$latest_zip" .zip | sed "s/${plugin_name}-//")
             else
@@ -163,15 +170,18 @@ update_plugin() {
         return 1
     fi
 
-    # Find the latest zip file
-    local latest_zip=$(ls -t "$plugin_repo_dir"/*.zip 2>/dev/null | head -1)
+    # Find the latest zip file (SC2155 fix - declare and assign separately)
+    local latest_zip
+    latest_zip=$(find_latest_zip "$plugin_repo_dir")
 
     if [ -z "$latest_zip" ]; then
         log_error "No zip file found for '$plugin_name'"
         return 1
     fi
 
-    local zip_version=$(basename "$latest_zip" .zip | sed "s/${plugin_name}-//")
+    # SC2155 fix - declare and assign separately
+    local zip_version
+    zip_version=$(basename "$latest_zip" .zip | sed "s/${plugin_name}-//")
     log_step "Updating $plugin_name to version $zip_version..."
 
     # Check if plugin is active
@@ -184,10 +194,10 @@ update_plugin() {
         fi
     fi
 
-    # Remove existing plugin
+    # Remove existing plugin (SC2115 fix - use :? to prevent expansion to /)
     if [ -d "$PLUGINS_DIR/$plugin_name" ]; then
         log_info "Removing old version..."
-        rm -rf "$PLUGINS_DIR/$plugin_name"
+        rm -rf "${PLUGINS_DIR:?}/${plugin_name:?}"
     fi
 
     # Extract new version
@@ -236,8 +246,9 @@ update_all() {
 
             # Only update if already installed
             if [ -d "$PLUGINS_DIR/$plugin_name" ]; then
-                # Check if there's a zip to install
-                latest_zip=$(ls -t "$plugin_dir"/*.zip 2>/dev/null | head -1)
+                # Check if there's a zip to install (using find instead of ls)
+                local latest_zip
+                latest_zip=$(find_latest_zip "$plugin_dir")
                 if [ -z "$latest_zip" ]; then
                     log_warn "Skipping $plugin_name - no zip in repo"
                     ((skipped++))
@@ -269,13 +280,14 @@ detect_missing_premium() {
 
     local missing_plugins=()
 
-    # Get all installed plugins
+    # Get all installed plugins (SC2155 fix - declare and assign separately)
     if ! command -v wp &> /dev/null; then
         log_warn "WP-CLI not available - cannot detect missing plugins"
         return
     fi
 
-    local installed_plugins=$(wp plugin list --field=name 2>/dev/null)
+    local installed_plugins
+    installed_plugins=$(wp plugin list --field=name 2>/dev/null)
 
     for plugin in $installed_plugins; do
         local is_premium=false
@@ -302,7 +314,9 @@ detect_missing_premium() {
         log_warn "Premium plugins installed but NOT in repo:"
         echo ""
         for plugin in "${missing_plugins[@]}"; do
-            local version=$(wp plugin get "$plugin" --field=version 2>/dev/null || echo "?")
+            # SC2155 fix - declare and assign separately
+            local version
+            version=$(wp plugin get "$plugin" --field=version 2>/dev/null || echo "?")
             echo "  - $plugin (v$version)"
         done
         echo ""
@@ -320,8 +334,11 @@ detect_missing_premium() {
 # Save missing plugins to a manifest file for tracking
 save_missing_manifest() {
     local manifest_file="$WP_ROOT/.claude/cache/missing-premium-plugins.txt"
-    local site_name=$(basename "$WP_ROOT")
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    # SC2155 fix - declare and assign separately
+    local site_name
+    site_name=$(basename "$WP_ROOT")
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
     mkdir -p "$(dirname "$manifest_file")"
 
@@ -331,7 +348,9 @@ save_missing_manifest() {
         echo "# These plugins need to be added to wp-premium-plugins repo"
         echo ""
         for plugin in "$@"; do
-            local version=$(wp plugin get "$plugin" --field=version 2>/dev/null || echo "unknown")
+            # SC2155 fix - declare and assign separately
+            local version
+            version=$(wp plugin get "$plugin" --field=version 2>/dev/null || echo "unknown")
             echo "$plugin|$version"
         done
     } > "$manifest_file"
