@@ -27,31 +27,71 @@ Reusable Claude Code configuration for WordPress/WooCommerce projects hosted on 
 └── settings.json           # Permissions and hook configuration
 ```
 
-## Quick Setup
+## Deployment to Kinsta Sites
 
-### New Site Workflow
+This configuration is designed to be deployed to every Kinsta WordPress instance managed by Blaze Commerce.
+
+### Download & Deploy Workflow
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  1. Copy .claude/ folder to WordPress root (public/)    │
-│  2. Start Claude Code                                   │
-│  3. Run /init  ← IMPORTANT! Generates site CLAUDE.md   │
-│  4. Run /wpm   ← Optional: populates plugin inventory   │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│  1. Download latest release from GitHub                              │
+│  2. Extract zip (creates .claude/ folder - no renaming needed)       │
+│  3. Upload .claude/ folder to Kinsta site root (public/)             │
+│  4. Start Claude Code and run /init                                  │
+│  5. Run /wpm to populate plugin inventory                            │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-**Step-by-step:**
+### Step-by-Step Deployment
 
-1. **Upload `.claude/` folder** to your WordPress project root (usually `public/`)
+#### 1. Download Release
+Go to [Releases](https://github.com/blaze-commerce/claude-wpm/releases) and download:
+- `claude-wpm-deploy.zip` (always latest version)
+- Or `claude-wpm-deploy-vX.X.X.zip` (specific version)
 
-2. **Start Claude Code** in that directory
+#### 2. Extract the Zip
+```bash
+unzip claude-wpm-deploy.zip
+# This creates: .claude/  (ready to upload - no renaming needed!)
+```
 
-3. **Run `/init`** - This generates a site-specific `CLAUDE.md` with:
-   - Directory structure
-   - Detected plugins/themes
-   - Project-specific details
+> **Note:** The zip file is named `claude-wpm-deploy-vX.X.X.zip` for version tracking, but when extracted it creates the `.claude/` folder directly.
 
-4. **(Optional) Run `/wpm`** - Populates the plugin inventory section
+#### 3. Upload to Kinsta
+Upload the `.claude/` folder to your WordPress root:
+```
+/public/
+├── .claude/          ← Upload here
+├── wp-content/
+├── wp-config.php
+└── ...
+```
+
+**Methods:**
+- SFTP (FileZilla, Cyberduck)
+- SSH: `scp -r .claude/ user@site.kinsta.cloud:~/public/`
+- Kinsta File Manager
+
+#### 4. Initialize with Claude Code
+```bash
+cd /path/to/public
+claude   # Start Claude Code
+
+# Then run:
+/init    # Generates site-specific CLAUDE.md
+/wpm     # Updates plugins and populates inventory
+```
+
+### Quick Reference
+
+| Step | Action | Result |
+|------|--------|--------|
+| Download | Get `claude-wpm-deploy.zip` from GitHub Releases | Versioned package |
+| Extract | `unzip claude-wpm-deploy.zip` | Creates `.claude/` folder |
+| Upload | Copy `.claude/` to site's `public/` | Configuration deployed |
+| Init | Run `/init` in Claude Code | Site-specific CLAUDE.md |
+| Update | Run `/wpm` | Plugins updated, inventory populated |
 
 The reusable instructions in `.claude/CLAUDE-BASE.md` are auto-loaded alongside your site-specific `CLAUDE.md`.
 
