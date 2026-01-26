@@ -1,0 +1,39 @@
+name: Create Release Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create deployment zip
+        run: |
+          zip -r claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip .claude \
+            -x ".claude/qa/*" \
+            -x ".claude/cache/*" \
+            -x ".claude/plans/*" \
+            -x ".claude/settings.local.json" \
+            -x ".claude/.github/*" \
+            -x "*.DS_Store" \
+            -x "*.swp" \
+            -x "*.swo"
+          cp claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip claude-wpm-deploy.zip
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip
+            claude-wpm-deploy.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

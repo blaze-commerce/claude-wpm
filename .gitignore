@@ -7,3 +7,17 @@
 
 # Premium plugins cache (cloned from private repo)
 .claude/cache/
+
+# Build output
+dist/
+
+# Plans
+plans/
+
+# QA test artifacts
+qa/node_modules/
+qa/reports/
+qa/test-results/
+qa/playwright-report/
+qa/.env
+qa/.env.local
