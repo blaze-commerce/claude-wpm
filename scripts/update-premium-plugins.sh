@@ -30,6 +30,27 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
+# Known premium plugin patterns (plugins not from wordpress.org)
+PREMIUM_PATTERNS=(
+    "-pro$"
+    "-premium$"
+    "^elementor-pro$"
+    "^gp-premium$"
+    "^perfmatters$"
+    "^admin-site-enhancements-pro$"
+    "^wp-mail-smtp-pro$"
+    "^surerank-pro$"
+    "^woo-.*-pro$"
+    "^woocommerce-.*-pro$"
+    "^gravityforms$"
+    "^advanced-custom-fields-pro$"
+    "^acf-pro$"
+    "^wpforms-pro$"
+    "^searchwp$"
+    "^wp-rocket$"
+    "^shortpixel-image-optimiser$"
+)
+
 # Check requirements
 check_requirements() {
     local missing=0
@@ -235,6 +256,87 @@ update_all() {
 
     echo "----------------------------------------"
     log_info "Summary: $updated updated, $skipped skipped, $failed failed"
+
+    # Check for premium plugins not in repo
+    echo ""
+    detect_missing_premium
+}
+
+# Detect premium plugins that are installed but not in repo
+detect_missing_premium() {
+    log_step "Checking for premium plugins not in repo..."
+    echo ""
+
+    local missing_plugins=()
+
+    # Get all installed plugins
+    if ! command -v wp &> /dev/null; then
+        log_warn "WP-CLI not available - cannot detect missing plugins"
+        return
+    fi
+
+    local installed_plugins=$(wp plugin list --field=name 2>/dev/null)
+
+    for plugin in $installed_plugins; do
+        local is_premium=false
+
+        # Check against known premium patterns
+        for pattern in "${PREMIUM_PATTERNS[@]}"; do
+            if echo "$plugin" | grep -qE "$pattern"; then
+                is_premium=true
+                break
+            fi
+        done
+
+        # If it's a premium plugin, check if it's in our repo
+        if [ "$is_premium" = true ]; then
+            if [ ! -d "$CACHE_DIR/plugins/$plugin" ]; then
+                missing_plugins+=("$plugin")
+            fi
+        fi
+    done
+
+    if [ ${#missing_plugins[@]} -eq 0 ]; then
+        log_info "✓ All detected premium plugins are in the repo"
+    else
+        log_warn "Premium plugins installed but NOT in repo:"
+        echo ""
+        for plugin in "${missing_plugins[@]}"; do
+            local version=$(wp plugin get "$plugin" --field=version 2>/dev/null || echo "?")
+            echo "  - $plugin (v$version)"
+        done
+        echo ""
+        log_info "To add these plugins:"
+        echo "  1. Download from gpltimes.com or vendor"
+        echo "  2. Add to wp-premium-plugins repo: plugins/<slug>/<slug>-<version>.zip"
+        echo "  3. Push to repo and run update again"
+        echo ""
+
+        # Save to missing plugins manifest
+        save_missing_manifest "${missing_plugins[@]}"
+    fi
+}
+
+# Save missing plugins to a manifest file for tracking
+save_missing_manifest() {
+    local manifest_file="$WP_ROOT/.claude/cache/missing-premium-plugins.txt"
+    local site_name=$(basename "$WP_ROOT")
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    mkdir -p "$(dirname "$manifest_file")"
+
+    {
+        echo "# Missing Premium Plugins - $site_name"
+        echo "# Last checked: $timestamp"
+        echo "# These plugins need to be added to wp-premium-plugins repo"
+        echo ""
+        for plugin in "$@"; do
+            local version=$(wp plugin get "$plugin" --field=version 2>/dev/null || echo "unknown")
+            echo "$plugin|$version"
+        done
+    } > "$manifest_file"
+
+    log_info "Missing plugins saved to: $manifest_file"
 }
 
 # Show usage
@@ -248,6 +350,7 @@ usage() {
     echo "  list        List available plugins and versions"
     echo "  update      Update a specific plugin"
     echo "  update-all  Update all installed premium plugins"
+    echo "  detect      Detect premium plugins not in repo"
     echo "  help        Show this help message"
     echo ""
     echo "Examples:"
@@ -284,6 +387,10 @@ main() {
         update-all)
             sync_repo
             update_all
+            ;;
+        detect)
+            sync_repo
+            detect_missing_premium
             ;;
         help|--help|-h)
             usage

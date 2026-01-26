@@ -37,6 +37,8 @@ This pulls from `git@github.com:blaze-commerce/wp-premium-plugins.git` and updat
 
 **Note:** Only updates plugins that have a zip file in the repo. If a premium plugin shows "no zip in repo", the user needs to upload the latest version to the repo first.
 
+**Auto-detection:** The script automatically detects premium plugins installed on this site that are NOT in the repo and reports them. Check `.claude/cache/missing-premium-plugins.txt` for any missing plugins.
+
 ### 5. Theme Updates
 ```bash
 wp theme update --all

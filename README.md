@@ -22,6 +22,8 @@ Reusable Claude Code configuration for WordPress/WooCommerce projects hosted on 
 ├── scripts/
 │   ├── blz-wpm.sh          # Direct SSH maintenance script
 │   └── update-premium-plugins.sh  # Premium plugin updater
+├── docs/
+│   └── premium-plugins-list.md    # Premium plugins documentation
 └── settings.json           # Permissions and hook configuration
 ```
 
