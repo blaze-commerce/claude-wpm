@@ -2,6 +2,35 @@
 
 Reusable Claude Code configuration for WordPress/WooCommerce projects hosted on Kinsta.
 
+---
+
+## Important: Deployment vs Local Components
+
+This repository contains **two types of components** with different purposes:
+
+| Component | Location | Purpose | Deploy to Live Sites? |
+|-----------|----------|---------|----------------------|
+| Hooks | `hooks/` | Safety blocks for Claude Code | YES |
+| Skills | `skills/` | Specialist prompts | YES |
+| Commands | `commands/` | Workflow automation (`/wpm`) | YES |
+| Scripts | `scripts/` | Shell maintenance scripts | YES |
+| **QA Tests** | `qa/` | Cross-browser E2E testing | **NO - LOCAL ONLY** |
+| **Plans** | `plans/` | Architecture & reference docs | **NO - Reference only** |
+
+### The Golden Rule
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  LIVE SITES (Kinsta):  hooks/ + skills/ + commands/ + scripts/     │
+│  LOCAL MACHINE ONLY:   qa/                                          │
+│  REFERENCE ONLY:       plans/                                       │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Why?** The `qa/` folder contains Playwright tests that run on your MacBook. The `plans/` folder contains architecture documentation for reference.
+
+---
+
 ## What's Included
 
 ```
@@ -21,88 +50,143 @@ Reusable Claude Code configuration for WordPress/WooCommerce projects hosted on 
 │   └── wpm.md              # /wpm - WordPress maintenance command
 ├── scripts/
 │   ├── blz-wpm.sh          # Direct SSH maintenance script
-│   └── update-premium-plugins.sh  # Premium plugin updater
-├── docs/
-│   └── premium-plugins-list.md    # Premium plugins documentation
-└── settings.json           # Permissions and hook configuration
+│   └── create-deploy-zip.sh # Build deployment package
+├── settings.json           # Permissions and hook configuration
+│
+├── plans/                  # Architecture & reference documentation
+│   ├── blaze-qa-test-framework.md   # QA test code and structure
+│   └── claude-wpm-master-plan.md    # Master plan and prompts
+│
+└── qa/                     # LOCAL ONLY - Cross-browser E2E tests
+    ├── config/             # Playwright configuration
+    ├── shared/             # Reusable test fixtures & utilities
+    ├── sites/              # Per-site test configurations
+    │   ├── birdbusta.net/
+    │   └── _template/      # Copy for new sites
+    ├── package.json        # Node.js dependencies
+    └── README.md           # QA-specific documentation
 ```
 
-## Deployment to Kinsta Sites
+## Deployment Workflows
 
-This configuration is designed to be deployed to every Kinsta WordPress instance managed by Blaze Commerce.
+### A. Deploy to New Live Site (Kinsta) - RECOMMENDED
 
-### Download & Deploy Workflow
+**Use GitHub Releases** - pre-built zip with `qa/` and `plans/` already excluded.
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│  1. Download latest release from GitHub                              │
-│  2. Extract zip (creates .claude/ folder - no renaming needed)       │
-│  3. Upload .claude/ folder to Kinsta site root (public/)             │
-│  4. Start Claude Code and run /init                                  │
-│  5. Run /wpm to populate plugin inventory                            │
-└──────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  1. Go to: github.com/blaze-commerce/claude-wpm/releases            │
+│  2. Download: claude-wpm-deploy.zip                                 │
+│  3. Upload to Kinsta → Extract to public/                           │
+│  4. Start Claude Code                                               │
+│  5. Run /init  ← Generates site CLAUDE.md                          │
+│  6. Run /wpm   ← Optional: populates plugin inventory               │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Step-by-Step Deployment
-
-#### 1. Download Release
-Go to [Releases](https://github.com/blaze-commerce/claude-wpm/releases) and download:
-- `claude-wpm-deploy.zip` (always latest version)
-- Or `claude-wpm-deploy-vX.X.X.zip` (specific version)
-
-#### 2. Upload Zip to Kinsta Server
-Upload the **zip file** (not extracted) to your WordPress root:
+**Direct download link:**
 ```
-/public/
-├── claude-wpm-deploy.zip   ← Upload zip here
-├── wp-content/
-├── wp-config.php
-└── ...
+https://github.com/blaze-commerce/claude-wpm/releases/latest/download/claude-wpm-deploy.zip
 ```
 
-**Upload methods:**
-- SFTP (FileZilla, Cyberduck)
-- Kinsta File Manager
-- SSH: `scp claude-wpm-deploy.zip user@site.kinsta.cloud:~/public/`
+**What's in the deploy zip:**
+```
+.claude/
+├── CLAUDE-BASE.md     Included
+├── README.md          Included
+├── hooks/             Included
+├── skills/            Included
+├── commands/          Included
+├── scripts/           Included
+├── settings.json      Included
+├── qa/                EXCLUDED (for local testing only)
+├── plans/             EXCLUDED (reference docs, stay in repo)
+└── cache/             EXCLUDED (temporary files)
+```
 
-#### 3. Extract on Server (via Claude Code)
-Start Claude Code on the Kinsta site and ask it to extract:
+---
+
+### Creating a New Release (Maintainers)
+
+**Option 1: Automatic (GitHub Actions)**
+
+1. Go to GitHub → Releases → "Create a new release"
+2. Create new tag: `v1.0.0` (use semantic versioning)
+3. Add release notes
+4. Click "Publish release"
+5. GitHub Actions automatically builds and attaches `claude-wpm-deploy.zip`
+
+**Option 2: Manual (Local)**
 
 ```bash
-# Claude will run:
-cd ~/public
-unzip claude-wpm-deploy.zip
-rm claude-wpm-deploy.zip  # Clean up zip file
+# On your MacBook
+cd claude-wpm
+.claude/scripts/create-deploy-zip.sh 1.0.0
+
+# Creates: dist/claude-wpm-deploy-1.0.0.zip
+# Then upload to GitHub Release manually
 ```
 
-> **How it works:** The zip contains `.claude/` at the root, so extraction automatically creates the correct folder structure - **no renaming needed!**
->
-> ```
-> claude-wpm-deploy-v1.0.0.zip    ← Zip filename (for version tracking)
->    └── .claude/                 ← Folder inside zip (extracted as-is)
->          ├── commands/
->          ├── hooks/
->          ├── scripts/
->          └── ...
-> ```
+---
 
-#### 4. Initialize Configuration
-After extraction, run in Claude Code:
+### B. Setup Local QA Testing (Your MacBook)
+
 ```
-/init    # Generates site-specific CLAUDE.md
-/wpm     # Updates plugins and populates inventory
+┌─────────────────────────────────────────────────────────────────────┐
+│  1. Clone full repo to MacBook                                      │
+│  2. cd claude-wpm/.claude/qa                                        │
+│  3. npm install                                                     │
+│  4. npx playwright install  (downloads browsers)                    │
+│  5. Update sites/<site>/site.config.ts with real URLs               │
+│  6. npm test                                                        │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Quick Reference
+**How QA tests work:**
+```
+┌──────────────────┐         HTTPS         ┌──────────────────┐
+│  Your MacBook    │ ───────────────────▶  │  Live Kinsta     │
+│                  │                       │  Site            │
+│  - Playwright    │   Tests run like a    │                  │
+│  - qa/ folder    │   real browser user   │  birdbusta.net   │
+│  - Node.js       │                       │  WooCommerce     │
+└──────────────────┘                       └──────────────────┘
+```
 
-| Step | Action | Result |
-|------|--------|--------|
-| 1. Download | Get `claude-wpm-deploy.zip` from GitHub Releases | Versioned package |
-| 2. Upload | Upload zip to Kinsta `public/` folder | Zip on server |
-| 3. Extract | Claude runs `unzip claude-wpm-deploy.zip` | Creates `.claude/` folder |
-| 4. Cleanup | Claude runs `rm claude-wpm-deploy.zip` | Remove zip file |
-| 5. Init | Run `/init` in Claude Code | Site-specific CLAUDE.md |
-| 6. Update | Run `/wpm` | Plugins updated, inventory populated |
+The tests run **FROM** your local machine, testing the live site via HTTP.
+They do NOT run on the server.
+
+---
+
+### C. Quick Reference
+
+| Task | Where | Command |
+|------|-------|---------|
+| Deploy to live site | Server | Download from GitHub Releases |
+| Run maintenance | Live site | `/wpm` via Claude Code |
+| Run E2E tests | Local MacBook | `cd .claude/qa && npm test` |
+| Add new test site | Local MacBook | Copy `qa/sites/_template/` |
+| View architecture docs | Repo | See `plans/` folder |
+
+---
+
+## Quick Setup (Live Site)
+
+**Step-by-step:**
+
+1. **Download deploy zip** from GitHub Releases (NOT the "Download ZIP" button)
+   - The deploy zip excludes `qa/` and `plans/` folders automatically
+
+2. **Upload to Kinsta** and extract to WordPress root (`public/`)
+
+3. **Start Claude Code** in that directory
+
+4. **Run `/init`** - This generates a site-specific `CLAUDE.md` with:
+   - Directory structure
+   - Detected plugins/themes
+   - Project-specific details
+
+5. **(Optional) Run `/wpm`** - Populates the plugin inventory section
 
 The reusable instructions in `.claude/CLAUDE-BASE.md` are auto-loaded alongside your site-specific `CLAUDE.md`.
 
@@ -154,36 +238,6 @@ This section is auto-updated when running `/wpm`. New plugins are marked with `<
 
 **Important:** The `## Plugin Inventory` section with the table format is required for `/wpm` to auto-update plugin lists.
 
-## Premium Plugins
-
-Premium plugins are managed via a private Git repository since they can't be updated via `wp plugin update --all`.
-
-**Repository:** `git@github.com:blaze-commerce/wp-premium-plugins.git`
-
-**Source:** Most premium plugins are downloaded from https://www.gpltimes.com/
-
-**Managed plugins:**
-- elementor-pro
-- gp-premium
-- perfmatters
-- woo-checkout-field-editor-pro
-- admin-site-enhancements-pro
-- wp-mail-smtp-pro
-- surerank-pro
-
-**How it works:**
-1. Premium plugin zips are stored in the private repo
-2. `/wpm` command calls `update-premium-plugins.sh` automatically
-3. Script pulls repo, extracts zips to wp-content/plugins
-4. If a plugin has no zip in repo, it's safely skipped (existing plugin untouched)
-
-**Manual usage:**
-```bash
-.claude/scripts/update-premium-plugins.sh list        # Show available plugins
-.claude/scripts/update-premium-plugins.sh update-all  # Update all premium plugins
-.claude/scripts/update-premium-plugins.sh update elementor-pro  # Update one plugin
-```
-
 ## Features
 
 ### Safety Hooks
@@ -200,7 +254,53 @@ Invoke with `/skill-name`:
 - `/database-administrator` - MySQL optimization
 
 ### Commands
-- `/wpm` - WordPress Maintenance (updates core, free plugins, premium plugins, themes in correct order)
+- `/wpm` - WordPress Maintenance (updates core, plugins, themes in correct order)
+
+### QA Testing (Local Only)
+
+Cross-browser WooCommerce testing using Playwright. **Runs on your MacBook, not on servers.**
+
+**Browsers supported:** Chrome, Firefox, Safari, Edge + Mobile viewports
+
+**Test modules:**
+| Module | Coverage |
+|--------|----------|
+| `shop-page.spec.ts` | Add to cart from shop/category pages |
+| `single-product.spec.ts` | Product page, variations, quantity |
+| `cart.spec.ts` | Cart updates, coupons, removal |
+| `checkout.spec.ts` | Billing, shipping, payment flow |
+
+**Commands (run from `qa/` directory):**
+```bash
+npm test                 # All tests, all browsers
+npm run test:chrome      # Chrome only
+npm run test:safari      # Safari only
+npm run test:headed      # Watch tests run visually
+npm run test:ui          # Interactive test UI
+```
+
+**Adding a new site:**
+1. Copy `qa/sites/_template/` to `qa/sites/newsite.com/`
+2. Edit `site.config.ts` with correct URLs
+3. Update `test-data.ts` with test products
+4. Run: `npm test -- --grep @newsite`
+
+See `plans/blaze-qa-test-framework.md` for complete test code and implementation details.
+
+---
+
+### Reference Documentation
+
+The `plans/` folder contains architecture and reference documentation:
+
+| Document | Purpose |
+|----------|---------|
+| `claude-wpm-master-plan.md` | Master plan with prompts, checklists, and architecture decisions |
+| `blaze-qa-test-framework.md` | Complete Playwright test code ready to implement |
+
+These documents are committed to git for reference but excluded from deployment packages.
+
+---
 
 ## Configuration Sources
 
@@ -213,10 +313,46 @@ Invoke with `/skill-name`:
 
 Claude is instructed (in CLAUDE-BASE.md) to check the source repositories at the start of each session for new hooks/skills.
 
+## Repository Structure Summary
+
+```
+claude-wpm/                    # Git repository root
+├── .claude/                   # This folder
+│   ├── hooks/                 # Deploy to live sites
+│   ├── skills/                # Deploy to live sites
+│   ├── commands/              # Deploy to live sites
+│   ├── scripts/               # Deploy to live sites
+│   ├── plans/                 # Reference docs (in git, not deployed)
+│   │   ├── blaze-qa-test-framework.md
+│   │   └── claude-wpm-master-plan.md
+│   ├── qa/                    # LOCAL ONLY - never deploy
+│   │   ├── sites/
+│   │   │   ├── birdbusta.net/
+│   │   │   └── _template/
+│   │   └── shared/
+│   └── cache/                 # EXCLUDED & gitignored
+├── .github/workflows/         # GitHub Actions
+└── README.md
+```
+
+**Legend:**
+- Deploy = Included in deploy zip (for live sites)
+- Reference = In git repo, excluded from deploy zip (reference only)
+- Local = Local MacBook only (excluded from deploy)
+- Excluded = Excluded from deploy zip & gitignored
+- Automation = GitHub Actions (excluded from deploy zip)
+
+---
+
 ## License
 
 MIT - Feel free to customize for your needs.
 
 ---
 
-Maintained by Blaze Commerce
+**Maintained by Blaze Commerce**
+
+| Component | Repository |
+|-----------|------------|
+| This config | `git@github.com:blaze-commerce/claude-wpm.git` |
+| Premium plugins | `git@github.com:blaze-commerce/wp-premium-plugins.git` |

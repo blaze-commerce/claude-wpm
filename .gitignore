@@ -1,23 +1,38 @@
+# OS files
 .DS_Store
+Thumbs.db
+
+# Editor files
 *.swp
 *.swo
 *~
 .vscode/
 .idea/
 
-# Premium plugins cache (cloned from private repo)
-.claude/cache/
+# Cache directories (temporary, don't commit)
+cache/
 
 # Build output
 dist/
 
-# Plans
-plans/
-
-# QA test artifacts
+# QA Testing - Local dependencies
 qa/node_modules/
+qa/package-lock.json
+
+# QA Testing - Test artifacts
 qa/reports/
 qa/test-results/
 qa/playwright-report/
+qa/playwright/.cache/
+qa/screenshots/
+qa/videos/
+qa/traces/
+
+# Environment files
 qa/.env
 qa/.env.local
+qa/.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
