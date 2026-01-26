@@ -1,0 +1,141 @@
+name: Security Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Also run before release workflow
+  workflow_call:
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Scan for sensitive data
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for sensitive patterns
+        run: |
+          echo "🔍 Scanning for sensitive data patterns..."
+
+          FOUND_ISSUES=0
+
+          # Patterns to check (excluding test files and examples)
+          PATTERNS=(
+            "AKIA[0-9A-Z]{16}"                    # AWS Access Key
+            "(?i)api[_-]?key.*['\"][a-zA-Z0-9]{20,}"  # API keys
+            "(?i)secret.*['\"][a-zA-Z0-9]{20,}"   # Secrets
+            "(?i)password.*['\"][^'\"]{8,}"       # Hardcoded passwords
+            "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"  # Private keys
+            "ghp_[a-zA-Z0-9]{36}"                 # GitHub Personal Access Token
+            "gho_[a-zA-Z0-9]{36}"                 # GitHub OAuth Token
+            "sk-[a-zA-Z0-9]{48}"                  # OpenAI API Key
+            "sk_live_[a-zA-Z0-9]{24,}"            # Stripe Live Key
+          )
+
+          # Files to scan (exclude binary, workflow examples)
+          FILES=$(find . -type f \( -name "*.sh" -o -name "*.md" -o -name "*.json" -o -name "*.yml" -o -name "*.yaml" \) \
+            ! -path "./.git/*" \
+            ! -path "./qa/*" \
+            ! -name "security-check.yml")
+
+          for pattern in "${PATTERNS[@]}"; do
+            if echo "$FILES" | xargs grep -lPn "$pattern" 2>/dev/null; then
+              echo "❌ Found potential sensitive data matching: $pattern"
+              FOUND_ISSUES=1
+            fi
+          done
+
+          if [ $FOUND_ISSUES -eq 1 ]; then
+            echo ""
+            echo "⚠️  Potential sensitive data found! Review the files above."
+            exit 1
+          fi
+
+          echo "✅ No sensitive data patterns detected"
+
+      - name: Check for hardcoded URLs that should be configurable
+        run: |
+          echo "🔍 Checking for hardcoded sensitive URLs..."
+
+          # Check for localhost/internal URLs that shouldn't be in production
+          SUSPICIOUS_URLS=$(grep -rPn "(localhost|127\.0\.0\.1|192\.168\.|10\.0\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" \
+            --include="*.sh" --include="*.md" --include="*.json" \
+            . 2>/dev/null | grep -v ".git" | grep -v "security-check.yml" || true)
+
+          if [ -n "$SUSPICIOUS_URLS" ]; then
+            echo "⚠️  Found localhost/internal URLs (review if intentional):"
+            echo "$SUSPICIOUS_URLS"
+          else
+            echo "✅ No suspicious URLs found"
+          fi
+
+      - name: Validate shell scripts (shellcheck)
+        run: |
+          echo "🔍 Validating shell scripts..."
+
+          # Install shellcheck
+          sudo apt-get update && sudo apt-get install -y shellcheck
+
+          # Find and check all shell scripts
+          SCRIPTS=$(find . -name "*.sh" ! -path "./.git/*" ! -path "./qa/*")
+
+          if [ -n "$SCRIPTS" ]; then
+            echo "Checking scripts:"
+            echo "$SCRIPTS"
+            echo ""
+
+            FAILED=0
+            for script in $SCRIPTS; do
+              echo "Checking: $script"
+              if ! shellcheck -e SC1091 -e SC2034 "$script"; then
+                FAILED=1
+              fi
+            done
+
+            if [ $FAILED -eq 1 ]; then
+              echo "❌ Shell script validation failed"
+              exit 1
+            fi
+          fi
+
+          echo "✅ All shell scripts passed validation"
+
+      - name: Check JSON syntax
+        run: |
+          echo "🔍 Validating JSON files..."
+
+          JSON_FILES=$(find . -name "*.json" ! -path "./.git/*" ! -path "./qa/*" ! -path "./node_modules/*")
+
+          FAILED=0
+          for file in $JSON_FILES; do
+            if ! python3 -m json.tool "$file" > /dev/null 2>&1; then
+              echo "❌ Invalid JSON: $file"
+              FAILED=1
+            else
+              echo "✅ Valid: $file"
+            fi
+          done
+
+          if [ $FAILED -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "✅ All JSON files are valid"
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: security-scan
+    if: always()
+
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.security-scan.result }}" == "failure" ]; then
+            echo "❌ Security checks failed - do not release!"
+            exit 1
+          fi
+          echo "✅ All security checks passed - safe to release"

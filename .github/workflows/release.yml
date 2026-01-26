@@ -5,8 +5,13 @@ on:
     types: [created]
 
 jobs:
+  # Run security checks first
+  security:
+    uses: ./.github/workflows/security-check.yml
+
   build:
     runs-on: ubuntu-latest
+    needs: security  # Only build if security checks pass
 
     steps:
       - name: Checkout repository
@@ -18,6 +23,9 @@ jobs:
 
       - name: Create deployment zip
         run: |
+          echo "📦 Creating deployment package..."
+          echo "Version: ${{ steps.version.outputs.VERSION }}"
+
           zip -r claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip .claude \
             -x ".claude/qa/*" \
             -x ".claude/cache/*" \
@@ -27,7 +35,12 @@ jobs:
             -x "*.DS_Store" \
             -x "*.swp" \
             -x "*.swo"
+
+          # Also create a "latest" copy
           cp claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip claude-wpm-deploy.zip
+
+          echo "✅ Created packages:"
+          ls -la claude-wpm-deploy*.zip
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
@@ -37,3 +50,19 @@ jobs:
             claude-wpm-deploy.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 📦 Release Package Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Files attached:**" >> $GITHUB_STEP_SUMMARY
+          echo "- \`claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip\` (versioned)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`claude-wpm-deploy.zip\` (latest)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Excluded from package:**" >> $GITHUB_STEP_SUMMARY
+          echo "- qa/ (test files)" >> $GITHUB_STEP_SUMMARY
+          echo "- cache/ (runtime cache)" >> $GITHUB_STEP_SUMMARY
+          echo "- plans/ (planning files)" >> $GITHUB_STEP_SUMMARY
+          echo "- .github/ (workflows)" >> $GITHUB_STEP_SUMMARY
