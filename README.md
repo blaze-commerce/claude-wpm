@@ -20,7 +20,8 @@ Reusable Claude Code configuration for WordPress/WooCommerce projects hosted on 
 ├── commands/
 │   └── wpm.md              # /wpm - WordPress maintenance command
 ├── scripts/
-│   └── blz-wpm.sh          # Direct SSH maintenance script
+│   ├── blz-wpm.sh          # Direct SSH maintenance script
+│   └── update-premium-plugins.sh  # Premium plugin updater
 └── settings.json           # Permissions and hook configuration
 ```
 
@@ -100,6 +101,36 @@ This section is auto-updated when running `/wpm`. New plugins are marked with `<
 
 **Important:** The `## Plugin Inventory` section with the table format is required for `/wpm` to auto-update plugin lists.
 
+## Premium Plugins
+
+Premium plugins are managed via a private Git repository since they can't be updated via `wp plugin update --all`.
+
+**Repository:** `git@github.com:blaze-commerce/wp-premium-plugins.git`
+
+**Source:** Most premium plugins are downloaded from https://www.gpltimes.com/
+
+**Managed plugins:**
+- elementor-pro
+- gp-premium
+- perfmatters
+- woo-checkout-field-editor-pro
+- admin-site-enhancements-pro
+- wp-mail-smtp-pro
+- surerank-pro
+
+**How it works:**
+1. Premium plugin zips are stored in the private repo
+2. `/wpm` command calls `update-premium-plugins.sh` automatically
+3. Script pulls repo, extracts zips to wp-content/plugins
+4. If a plugin has no zip in repo, it's safely skipped (existing plugin untouched)
+
+**Manual usage:**
+```bash
+.claude/scripts/update-premium-plugins.sh list        # Show available plugins
+.claude/scripts/update-premium-plugins.sh update-all  # Update all premium plugins
+.claude/scripts/update-premium-plugins.sh update elementor-pro  # Update one plugin
+```
+
 ## Features
 
 ### Safety Hooks
@@ -116,7 +147,7 @@ Invoke with `/skill-name`:
 - `/database-administrator` - MySQL optimization
 
 ### Commands
-- `/wpm` - WordPress Maintenance (updates core, plugins, themes in correct order)
+- `/wpm` - WordPress Maintenance (updates core, free plugins, premium plugins, themes in correct order)
 
 ## Configuration Sources
 

@@ -88,9 +88,45 @@ Located in `.claude/commands/`. Custom workflow automation:
 | `/wpm` | WordPress Maintenance - updates core, plugins, themes in correct order |
 
 **Update order followed by `/wpm`:**
-1. WordPress core -> 2. Database -> 3. Plugins -> 4. Themes -> 5. (Manual cache clear reminder)
+1. WordPress core -> 2. Database -> 3. Free plugins -> 4. Premium plugins -> 5. Themes -> 6. (Manual cache clear reminder)
 
 **Direct SSH alternative:** `.claude/scripts/blz-wpm.sh`
+
+---
+
+## Premium Plugins
+
+Premium plugins cannot be updated via `wp plugin update --all` (requires license validation).
+
+**Solution:** Private Git repository at `git@github.com:blaze-commerce/wp-premium-plugins.git`
+
+**Source:** https://www.gpltimes.com/
+
+**Managed plugins:**
+- elementor-pro
+- gp-premium
+- perfmatters
+- woo-checkout-field-editor-pro
+- admin-site-enhancements-pro
+- wp-mail-smtp-pro
+- surerank-pro
+
+**Update script:** `.claude/scripts/update-premium-plugins.sh`
+
+```bash
+# List available premium plugins and versions
+.claude/scripts/update-premium-plugins.sh list
+
+# Update all installed premium plugins
+.claude/scripts/update-premium-plugins.sh update-all
+
+# Update specific plugin
+.claude/scripts/update-premium-plugins.sh update elementor-pro
+```
+
+**Safety:** If a plugin has no zip in the repo, it's skipped - existing installation remains untouched.
+
+**Adding new plugin versions to repo:** Upload zip to wp-premium-plugins repo, then run update on sites.
 
 ---
 

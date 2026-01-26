@@ -4,3 +4,6 @@
 *~
 .vscode/
 .idea/
+
+# Premium plugins cache (cloned from private repo)
+.claude/cache/
