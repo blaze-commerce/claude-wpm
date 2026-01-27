@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'  # Triggers on any tag starting with 'v' (e.g., v1.0.0, v1.0.1)
 
+permissions:
+  contents: write  # Required to create releases and upload assets
+
 jobs:
   # Run security checks first
   security:
