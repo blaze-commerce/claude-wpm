@@ -73,12 +73,17 @@ This repository contains **two types of components** with different purposes:
 
 **Use GitHub Releases** - pre-built zip with `qa/` and `plans/` already excluded.
 
+**Step 0: Install Claude Code** (if not already installed)
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  1. Go to: github.com/blaze-commerce/claude-wpm/releases            │
 │  2. Download: claude-wpm-deploy.zip                                 │
 │  3. Upload to Kinsta → Extract to public/                           │
-│  4. Start Claude Code                                               │
+│  4. Start Claude Code:  claude                                      │
 │  5. Run /init  ← Generates site CLAUDE.md                          │
 │  6. Run /wpm   ← Optional: populates plugin inventory               │
 └─────────────────────────────────────────────────────────────────────┘
@@ -99,6 +104,7 @@ https://github.com/blaze-commerce/claude-wpm/releases/latest/download/claude-wpm
 ├── commands/          Included
 ├── scripts/           Included
 ├── settings.json      Included
+├── CONTRIBUTING.md    EXCLUDED (for repo contributors only)
 ├── qa/                EXCLUDED (for local testing only)
 ├── plans/             EXCLUDED (reference docs, stay in repo)
 └── cache/             EXCLUDED (temporary files)
@@ -162,6 +168,7 @@ They do NOT run on the server.
 
 | Task | Where | Command |
 |------|-------|---------|
+| Install Claude Code | Server/Local | `curl -fsSL https://claude.ai/install.sh \| bash` |
 | Deploy to live site | Server | Download from GitHub Releases |
 | Run maintenance | Live site | `/wpm` via Claude Code |
 | Run E2E tests | Local MacBook | `cd .claude/qa && npm test` |
@@ -173,6 +180,11 @@ They do NOT run on the server.
 ## Quick Setup (Live Site)
 
 **Step-by-step:**
+
+0. **Install Claude Code** (if not already installed)
+   ```bash
+   curl -fsSL https://claude.ai/install.sh | bash
+   ```
 
 1. **Download deploy zip** from GitHub Releases (NOT the "Download ZIP" button)
    - The deploy zip excludes `qa/` and `plans/` folders automatically
@@ -252,6 +264,7 @@ Invoke with `/skill-name`:
 - `/php-pro` - PHP development
 - `/security-auditor` - Security review
 - `/database-administrator` - MySQL optimization
+- `/senior-architect` - Architectural decisions, trade-off analysis, planning
 
 ### Commands
 - `/wpm` - WordPress Maintenance (updates core, plugins, themes in correct order)
@@ -341,6 +354,27 @@ claude-wpm/                    # Git repository root
 - Local = Local MacBook only (excluded from deploy)
 - Excluded = Excluded from deploy zip & gitignored
 - Automation = GitHub Actions (excluded from deploy zip)
+
+---
+
+## Contributing
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for:
+- Branch naming conventions (`feature/`, `fix/`, `docs/`, etc.)
+- Commit message format (Conventional Commits)
+- Semantic versioning for releases
+- Pull request guidelines
+
+**Quick Reference:**
+```bash
+# Branch naming
+git checkout -b feature/add-new-skill
+git checkout -b fix/hook-regex-error
+
+# Commit format
+git commit -m "feat(scope): description"
+git commit -m "fix(hooks): correct wp-config regex"
+```
 
 ---
 

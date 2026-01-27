@@ -31,6 +31,7 @@ zip -r "$OUTPUT_DIR/$OUTPUT_FILE" .claude \
     -x ".claude/qa/*" \
     -x ".claude/cache/*" \
     -x ".claude/plans/*" \
+    -x ".claude/CONTRIBUTING.md" \
     -x ".claude/settings.local.json" \
     -x "*.DS_Store" \
     -x "*.swp" \

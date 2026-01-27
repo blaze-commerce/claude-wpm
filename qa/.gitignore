@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test outputs (except baselines)
+reports/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Screenshots and videos (generated during tests)
+# Note: Baseline screenshots in __screenshots__ folders ARE committed
+videos/
+traces/
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*

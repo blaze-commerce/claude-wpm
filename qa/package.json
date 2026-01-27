@@ -1,0 +1,27 @@
+{
+  "name": "blaze-qa",
+  "version": "1.0.0",
+  "description": "Cross-browser visual regression testing framework for WooCommerce sites",
+  "scripts": {
+    "test": "playwright test",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:safari": "playwright test --project=webkit",
+    "test:edge": "playwright test --project=msedge",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:update-baseline": "playwright test --update-snapshots",
+    "report": "playwright show-report reports/html",
+    "publish-report": "./scripts/publish-report.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.0",
+    "dotenv": "^16.4.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
