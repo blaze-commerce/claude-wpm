@@ -54,11 +54,14 @@ jobs:
           # Create .claude directory structure for deployment
           mkdir -p deploy-staging/.claude
 
-          # Copy files to staging (excluding qa, cache, plans, .github)
-          rsync -av --exclude='qa/' \
+          # Copy files to staging (excluding dev/test folders)
+          rsync -av --exclude='.git/' \
+                    --exclude='qa/' \
                     --exclude='cache/' \
                     --exclude='plans/' \
                     --exclude='.github/' \
+                    --exclude='docs/qa-report/' \
+                    --exclude='node_modules/' \
                     --exclude='settings.local.json' \
                     --exclude='.DS_Store' \
                     --exclude='*.swp' \
@@ -66,6 +69,11 @@ jobs:
                     --exclude='deploy-staging/' \
                     --exclude='changelog.txt' \
                     . deploy-staging/.claude/
+
+          # Show what's being packaged
+          echo "📋 Contents of deploy package:"
+          du -sh deploy-staging/.claude/*/
+          du -sh deploy-staging/.claude/
 
           # Create zip from staging directory
           cd deploy-staging
