@@ -75,8 +75,14 @@ This repository contains **two types of components** with different purposes:
 
 **Step 0: Install Claude Code** (if not already installed)
 ```bash
+# For production servers (recommended) - stable channel
+curl -fsSL https://claude.ai/install.sh | bash -s stable
+
+# Or latest channel (newest features, may have occasional issues)
 curl -fsSL https://claude.ai/install.sh | bash
 ```
+
+> **Note:** npm installation (`npm install -g @anthropic-ai/claude-code`) is **deprecated**. Use the native installer above.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -189,7 +195,7 @@ They do NOT run on the server.
 
 | Task | Where | Command |
 |------|-------|---------|
-| Install Claude Code | Server/Local | `curl -fsSL https://claude.ai/install.sh \| bash` |
+| Install Claude Code | Server/Local | `curl -fsSL https://claude.ai/install.sh \| bash -s stable` |
 | Deploy to live site | Server | Download from GitHub Releases |
 | Run maintenance | Live site | `/wpm` via Claude Code |
 | Run E2E tests | Local MacBook | `cd .claude/qa && npm test` |
@@ -204,7 +210,8 @@ They do NOT run on the server.
 
 0. **Install Claude Code** (if not already installed)
    ```bash
-   curl -fsSL https://claude.ai/install.sh | bash
+   # Stable channel recommended for production
+   curl -fsSL https://claude.ai/install.sh | bash -s stable
    ```
 
 1. **Download deploy zip** from GitHub Releases (NOT the "Download ZIP" button)
