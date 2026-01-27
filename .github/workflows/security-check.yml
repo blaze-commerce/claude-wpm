@@ -36,10 +36,11 @@ jobs:
             "sk_live_[a-zA-Z0-9]{24,}"            # Stripe Live Key
           )
 
-          # Files to scan (exclude binary, workflow examples)
+          # Files to scan (exclude binary, workflow examples, generated reports)
           FILES=$(find . -type f \( -name "*.sh" -o -name "*.md" -o -name "*.json" -o -name "*.yml" -o -name "*.yaml" \) \
             ! -path "./.git/*" \
             ! -path "./qa/*" \
+            ! -path "./docs/qa-report/*" \
             ! -name "security-check.yml")
 
           for pattern in "${PATTERNS[@]}"; do
@@ -64,7 +65,7 @@ jobs:
           # Check for localhost/internal URLs that shouldn't be in production
           SUSPICIOUS_URLS=$(grep -rPn "(localhost|127\.0\.0\.1|192\.168\.|10\.0\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" \
             --include="*.sh" --include="*.md" --include="*.json" \
-            . 2>/dev/null | grep -v ".git" | grep -v "security-check.yml" || true)
+            . 2>/dev/null | grep -v ".git" | grep -v "security-check.yml" | grep -v "docs/qa-report" || true)
 
           if [ -n "$SUSPICIOUS_URLS" ]; then
             echo "⚠️  Found localhost/internal URLs (review if intentional):"
@@ -108,7 +109,7 @@ jobs:
         run: |
           echo "🔍 Validating JSON files..."
 
-          JSON_FILES=$(find . -name "*.json" ! -path "./.git/*" ! -path "./qa/*" ! -path "./node_modules/*")
+          JSON_FILES=$(find . -name "*.json" ! -path "./.git/*" ! -path "./qa/*" ! -path "./docs/qa-report/*" ! -path "./node_modules/*")
 
           FAILED=0
           for file in $JSON_FILES; do
