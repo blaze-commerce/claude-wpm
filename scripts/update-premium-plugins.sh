@@ -185,12 +185,14 @@ update_plugin() {
     log_step "Updating $plugin_name to version $zip_version..."
 
     # Check if plugin is active
+    # Note: wp commands are wrapped with || true to prevent set -e from exiting
+    # the script when running update-all (we want to continue with other plugins)
     local was_active=false
     if command -v wp &> /dev/null; then
         if wp plugin is-active "$plugin_name" 2>/dev/null; then
             was_active=true
             log_info "Deactivating $plugin_name..."
-            wp plugin deactivate "$plugin_name" --quiet
+            wp plugin deactivate "$plugin_name" --quiet || log_warn "Failed to deactivate $plugin_name (continuing anyway)"
         fi
     fi
 
@@ -214,7 +216,7 @@ update_plugin() {
     # Reactivate if it was active
     if [ "$was_active" = true ] && command -v wp &> /dev/null; then
         log_info "Reactivating $plugin_name..."
-        wp plugin activate "$plugin_name" --quiet
+        wp plugin activate "$plugin_name" --quiet || log_warn "Failed to reactivate $plugin_name (may need manual activation)"
     fi
 
     log_info "✓ $plugin_name updated to $zip_version"
@@ -287,7 +289,12 @@ detect_missing_premium() {
     fi
 
     local installed_plugins
-    installed_plugins=$(wp plugin list --field=name 2>/dev/null)
+    installed_plugins=$(wp plugin list --field=name 2>/dev/null || echo "")
+
+    if [ -z "$installed_plugins" ]; then
+        log_warn "Could not get plugin list from WP-CLI"
+        return
+    fi
 
     for plugin in $installed_plugins; do
         local is_premium=false
