@@ -905,7 +905,47 @@ npm test -- --grep @newsite
 
 ---
 
-## 13. Open Questions
+## 13. Future Enhancements & Research
+
+### Screenshot Diff Comparison (High Priority)
+
+**Reference:** [Ghost Inspector](https://ghostinspector.com/)
+
+Ghost Inspector provides excellent visual diff comparison showing:
+- Side-by-side baseline vs current screenshot
+- Highlighted differences overlay
+- Pixel-level change detection
+
+**TODO:**
+- [ ] Review Ghost Inspector's UI/UX for diff comparison
+- [ ] Research how Playwright's built-in diff works
+- [ ] Evaluate if we need custom diff visualization
+- [ ] Consider integrating a diff viewer into our dashboard
+
+### Full-Page Screenshots (High Priority)
+
+**Requirement:** Capture entire page content, not just viewport - especially important for:
+- Long product pages
+- Mobile views (content stacks vertically)
+- Pages with lots of content below the fold
+
+**Current Status:** Using `fullPage: true` in Playwright config
+
+**TODO:**
+- [ ] Verify full-page capture works on all viewports (desktop/tablet/mobile)
+- [ ] Test with very long pages (Privacy Policy, etc.)
+- [ ] Ensure lazy-loaded images are captured (scroll before screenshot)
+- [ ] Document any limitations
+
+### Other Research Items
+
+- [ ] Investigate scheduled/automated test runs (GitHub Actions cron)
+- [ ] Research test parallelization optimization
+- [ ] Evaluate cloud browser testing (BrowserStack, Sauce Labs) for edge cases
+
+---
+
+## 14. Open Questions
 
 **For User Review:**
 
