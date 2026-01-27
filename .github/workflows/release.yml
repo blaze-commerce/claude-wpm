@@ -48,15 +48,26 @@ jobs:
           echo "📦 Creating deployment package..."
           echo "Version: ${{ steps.version.outputs.VERSION }}"
 
-          zip -r claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip .claude \
-            -x ".claude/qa/*" \
-            -x ".claude/cache/*" \
-            -x ".claude/plans/*" \
-            -x ".claude/settings.local.json" \
-            -x ".claude/.github/*" \
-            -x "*.DS_Store" \
-            -x "*.swp" \
-            -x "*.swo"
+          # Create .claude directory structure for deployment
+          mkdir -p deploy-staging/.claude
+
+          # Copy files to staging (excluding qa, cache, plans, .github)
+          rsync -av --exclude='qa/' \
+                    --exclude='cache/' \
+                    --exclude='plans/' \
+                    --exclude='.github/' \
+                    --exclude='settings.local.json' \
+                    --exclude='.DS_Store' \
+                    --exclude='*.swp' \
+                    --exclude='*.swo' \
+                    --exclude='deploy-staging/' \
+                    --exclude='changelog.txt' \
+                    . deploy-staging/.claude/
+
+          # Create zip from staging directory
+          cd deploy-staging
+          zip -r ../claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip .claude
+          cd ..
 
           # Also create a "latest" copy
           cp claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip claude-wpm-deploy.zip
