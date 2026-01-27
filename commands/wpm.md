@@ -44,6 +44,54 @@ This pulls from `git@github.com:blaze-commerce/wp-premium-plugins.git` and updat
 wp theme update --all
 ```
 
+## Premium Plugin Reminder
+
+After running updates, `/wpm` should output a reminder checklist of all premium plugins:
+
+### Output Format
+```
+⚠️  PREMIUM PLUGIN REMINDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The following premium plugins require manual verification:
+┌─────────────────────────────┬───────────┬────────┬────────────────┐
+│           Plugin            │ Installed │  Repo  │     Status     │
+├─────────────────────────────┼───────────┼────────┼────────────────┤
+│ admin-site-enhancements-pro │ 8.3.0     │ 8.3.0  │ ✓ Updated      │
+├─────────────────────────────┼───────────┼────────┼────────────────┤
+│ oxygen                      │ 4.9.1     │ -      │ ⚠️ Not in repo │
+├─────────────────────────────┼───────────┼────────┼────────────────┤
+│ gravityforms                │ 2.9.26    │ 2.9.26 │ ✓ Current      │
+└─────────────────────────────┴───────────┴────────┴────────────────┘
+
+Action Required:
+☐ Verify premium plugins not in repo are up to date
+☐ Test Oxygen-related plugins on staging before updating
+☐ Update CLAUDE.md plugin inventory with new versions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Special Warnings
+
+Add these warnings to the output when applicable:
+
+1. **Oxygen Builder Warning**: If oxygen, oxygen-woocommerce, oxy-ninja, or oxyultimate-woo are installed:
+   ```
+   ⚠️  WARNING: Oxygen Builder plugins detected. DO NOT update without testing on staging first.
+   ```
+
+2. **Missing from Repo Warning**: If premium plugins are installed but not in wp-premium-plugins repo:
+   ```
+   ⚠️  These premium plugins are NOT in the update repo:
+      - oxygen (4.9.1)
+      - oxy-ninja (3.5.3)
+
+   Add zips to wp-premium-plugins repo or update manually.
+   ```
+
+---
+
 ## After Updates: Update Plugin Inventory
 
 After running the updates, you MUST update the "Plugin Inventory" section in CLAUDE.md:

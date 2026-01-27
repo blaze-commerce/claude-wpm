@@ -134,6 +134,16 @@ MAJOR.MINOR.PATCH
 | Added new skill | MINOR | `v1.1.0` |
 | Restructured entire folder layout | MAJOR | `v2.0.0` |
 
+### When to Create a Release
+
+**IMPORTANT:** Always create a new release after:
+- **Critical bug fixes** (script failures, data loss risks) → Immediate PATCH release
+- **Security fixes** → Immediate PATCH release
+- **New features** → MINOR release when ready
+- **Breaking changes** → MAJOR release
+
+If you fix a bug in a script (like `update-premium-plugins.sh`) that could affect production sites, **create a patch release immediately** so users can pull the fix.
+
 ### Creating a Release
 
 ```bash
@@ -147,7 +157,10 @@ git tag -a v1.1.0 -m "Release v1.1.0 - Added performance optimizer skill"
 # 3. Push tag (triggers GitHub Actions to build deploy zip)
 git push origin v1.1.0
 
-# 4. Go to GitHub Releases to add release notes
+# 4. Create GitHub Release with gh CLI
+gh release create v1.1.0 --title "v1.1.0" --notes "Release notes here"
+
+# Or go to GitHub Releases to add release notes manually
 ```
 
 ---

@@ -1,20 +1,56 @@
-# Premium Plugins Master List
+# Premium Plugins
 
-This document tracks all premium plugins used across Blaze Commerce sites.
+This is a site-specific file. Update with your site's premium plugins.
 
-## Currently in Repository
+## Site Premium Plugins
 
-These plugins have zips in `wp-premium-plugins` repo:
+| Plugin | Version | Vendor | Notes |
+|--------|---------|--------|-------|
+| elementor-pro | x.x.x | gpltimes.com | Page builder |
+| gp-premium | x.x.x | gpltimes.com | GeneratePress premium |
+| perfmatters | x.x.x | gpltimes.com | Performance |
+| admin-site-enhancements-pro | x.x.x | gpltimes.com | Admin enhancements |
+| wp-mail-smtp-pro | x.x.x | gpltimes.com | Email delivery |
 
-| Plugin Slug | Source | Notes |
-|-------------|--------|-------|
-| elementor-pro | gpltimes.com | Page builder |
-| gp-premium | gpltimes.com | GeneratePress premium |
-| perfmatters | gpltimes.com | Performance |
-| woo-checkout-field-editor-pro | gpltimes.com | WooCommerce checkout |
-| admin-site-enhancements-pro | gpltimes.com | Admin enhancements |
-| wp-mail-smtp-pro | gpltimes.com | Email delivery |
-| surerank-pro | gpltimes.com | SEO |
+## Update Warnings
+
+> ⚠️ List any plugins that should NOT be auto-updated here.
+
+**Example warnings:**
+- `oxygen` - Test on staging before updating (page builder, can break layouts)
+- `oxygen-woocommerce` - Same as above
+- `gravityforms` - Check form compatibility after update
+
+## Plugins NOT in Update Repo
+
+These premium plugins are installed but not managed by `update-premium-plugins.sh`:
+
+| Plugin | Version | Reason |
+|--------|---------|--------|
+| oxygen | 4.9.1 | Not in repo - update manually |
+
+## Checklist Template
+
+After `/wpm`, verify:
+- [ ] All premium plugins updated
+- [ ] Oxygen plugins tested on staging (if applicable)
+- [ ] CLAUDE.md inventory updated
+- [ ] Site functionality verified
+
+---
+
+## Adding Plugins to the Repo
+
+When a premium plugin is missing from the repo:
+
+1. Check `.claude/cache/missing-premium-plugins.txt` for the list
+2. Download from gpltimes.com (or vendor if licensed)
+3. Add to `wp-premium-plugins` repo:
+   ```
+   plugins/<slug>/<slug>-<version>.zip
+   ```
+4. Commit and push
+5. Update this file with the new plugin
 
 ## Known Premium Plugin Patterns
 
@@ -24,23 +60,4 @@ The update script detects these patterns as premium plugins:
 - `*-premium` (e.g., gp-premium)
 - Specific slugs: perfmatters, gravityforms, wp-rocket, etc.
 
-## Adding New Premium Plugins
-
-When `/wpm` detects a premium plugin not in the repo:
-
-1. Check `.claude/cache/missing-premium-plugins.txt` for the list
-2. Download from gpltimes.com (or vendor if licensed)
-3. Add to `wp-premium-plugins` repo:
-   ```
-   plugins/<slug>/<slug>-<version>.zip
-   ```
-4. Commit and push
-5. Update this list
-
-## Sites Using Premium Plugins
-
-| Site | Premium Plugins |
-|------|-----------------|
-| birdbustanet | elementor-pro, gp-premium, perfmatters, admin-site-enhancements-pro, wp-mail-smtp-pro, surerank-pro, woo-checkout-field-editor-pro |
-
-*Update this table when adding new sites*
+See `scripts/update-premium-plugins.sh` for the full pattern list.

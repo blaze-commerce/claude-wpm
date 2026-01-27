@@ -132,6 +132,17 @@ Premium plugins cannot be updated via `wp plugin update --all` (requires license
 
 ## WordPress Best Practices
 
+### Premium Plugin Updates
+
+After running `/wpm`:
+1. Check the premium plugin reminder output
+2. Verify all premium plugins are current
+3. For Oxygen-related plugins, ALWAYS test on staging first
+4. Update the site's CLAUDE.md with new versions
+5. Check `.claude/cache/missing-premium-plugins.txt` for plugins not in repo
+
+**Oxygen Builder Warning:** Never auto-update Oxygen, oxygen-woocommerce, oxy-ninja, or oxyultimate-woo without testing on staging first. These can break page layouts.
+
 ### Do Not Modify
 - `wp-includes/` - WordPress core
 - `wp-admin/` - WordPress core
