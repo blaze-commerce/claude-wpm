@@ -43,7 +43,7 @@ export default defineConfig({
   use: {
     // Tracing and debugging
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',  // Capture screenshots for ALL tests (pass/fail) for documentation
     video: 'retain-on-failure',
 
     // Timeouts
