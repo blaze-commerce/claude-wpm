@@ -128,6 +128,47 @@ Last updated: [DATE] via `/wpm`
 | old-plugin | 2.0.0 | |
 ```
 
+## Required Security Plugin Check
+
+After updates, check if WP 2FA is installed. This is **required** on all Blaze Commerce sites.
+
+```bash
+wp plugin is-installed wp-2fa && echo "✓ WP 2FA installed" || echo "⚠️ WP 2FA NOT INSTALLED"
+```
+
+### If WP 2FA is NOT installed:
+
+Display this warning prominently:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  SECURITY ALERT: WP 2FA NOT INSTALLED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Two-Factor Authentication is REQUIRED on all sites.
+
+Install now:
+  wp plugin install wp-2fa --activate
+
+Plugin: https://wordpress.org/plugins/wp-2fa/
+
+After installing:
+1. Go to WP Admin → WP 2FA → Setup Wizard
+2. Configure 2FA policies for all admin users
+3. Enforce 2FA for administrators at minimum
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### If WP 2FA IS installed:
+
+Show brief confirmation:
+```
+✓ WP 2FA: Installed and active
+```
+
+---
+
 ## Final Reminders
 
 After completing all tasks, remind the user:

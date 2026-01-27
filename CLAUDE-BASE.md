@@ -132,6 +132,15 @@ Premium plugins cannot be updated via `wp plugin update --all` (requires license
 
 ## WordPress Best Practices
 
+### Required Security Plugins
+
+**WP 2FA** (Two-Factor Authentication) is **required** on ALL Blaze Commerce sites.
+
+- Plugin: https://wordpress.org/plugins/wp-2fa/
+- Install: `wp plugin install wp-2fa --activate`
+
+The `/wpm` command automatically checks for this plugin and displays a warning if missing.
+
 ### Premium Plugin Updates
 
 After running `/wpm`:

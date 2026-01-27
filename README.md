@@ -94,6 +94,27 @@ curl -fsSL https://claude.ai/install.sh | bash
 https://github.com/blaze-commerce/claude-wpm/releases/latest/download/claude-wpm-deploy.zip
 ```
 
+### Updating an Existing Site
+
+When updating a site that already has `.claude/` installed:
+
+```bash
+# Download and overwrite existing files
+cd /path/to/wordpress
+unzip -o claude-wpm-deploy.zip
+```
+
+**Unzip options:**
+| Flag | Behavior |
+|------|----------|
+| `-o` | Overwrite all (recommended for updates) |
+| `-n` | Never overwrite (keeps existing) |
+| `-u` | Only overwrite if zip is newer |
+
+**Safe to overwrite:** The deploy zip excludes `cache/`, `settings.local.json`, and site-specific data.
+
+**Caution:** If you've customized hooks, skills, or commands, use `-n` or back up first.
+
 **What's in the deploy zip:**
 ```
 .claude/
