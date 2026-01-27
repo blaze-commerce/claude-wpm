@@ -8,7 +8,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 QA_DIR="$(dirname "$SCRIPT_DIR")"
-REPO_ROOT="$(dirname "$(dirname "$QA_DIR")")"
+REPO_ROOT="$(dirname "$QA_DIR")"
 RESULTS_FILE="$QA_DIR/reports/results.json"
 DOCS_DIR="$REPO_ROOT/docs/qa-report"
 
@@ -92,5 +92,5 @@ echo -e "${GREEN}==========================================${NC}"
 echo -e "${GREEN}  Report Published Successfully!${NC}"
 echo -e "${GREEN}==========================================${NC}"
 echo ""
-echo "View at: https://blaze-commerce.github.io/claude-wpm/"
+echo "View at: https://blaze-commerce.github.io/claude-wpm/qa-report/"
 echo ""
