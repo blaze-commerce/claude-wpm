@@ -16,9 +16,11 @@
 6. [Test Foundation Architecture](#6-test-foundation-architecture)
 7. [Decisions & Trade-offs](#7-decisions--trade-offs)
 8. [Implementation Phases](#8-implementation-phases)
-9. [Screenshot Testing Strategy](#9-screenshot-testing-strategy)
-10. [Per-Site Documentation](#10-per-site-documentation)
-11. [Open Questions](#11-open-questions)
+9. [Test Status Definitions](#9-test-status-definitions)
+10. [Screenshot Testing Strategy](#10-screenshot-testing-strategy)
+11. [WooCommerce Functional Testing](#11-woocommerce-functional-testing)
+12. [Per-Site Documentation](#12-per-site-documentation)
+13. [Open Questions](#13-open-questions)
 
 ---
 
@@ -424,6 +426,51 @@ export const selectorOverrides = {
 
 ---
 
+### Decision 4: Edge Browser Inclusion
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **A: Include Edge** | 100% major browser coverage, Corporate users | Same engine as Chrome, 30% more tests |
+| **B: Exclude Edge** | Faster test runs, no redundant coverage | Missing Edge-specific bugs (rare) |
+
+**Decision:** Option B - Exclude Edge (Recommended by Senior Architect)
+
+**Senior Architect Rationale:**
+1. **Engine Redundancy:** Edge uses the same Chromium engine as Chrome. Testing both is redundant - any rendering bug in Chromium will appear in both browsers.
+2. **Unique Engine Coverage:** Chrome (Chromium), Firefox (Gecko), and Safari (WebKit) cover ALL three major rendering engines. Edge adds no unique engine coverage.
+3. **Test Efficiency:** Excluding Edge reduces test count by ~25% (120 vs 165 screenshots) with negligible coverage loss.
+4. **Edge-Specific Bugs:** In practice, Edge-specific rendering bugs are extremely rare (<0.1% of issues) because it shares Chrome's rendering engine.
+5. **Resource Optimization:** Faster CI/CD pipelines, less storage for baselines, quicker developer feedback.
+
+**When to Reconsider:**
+- If a client specifically reports Edge-only issues
+- If Edge deviates significantly from Chrome in future versions
+- If corporate compliance requires explicit Edge testing
+
+**Installation (if needed later):**
+```bash
+brew install --cask microsoft-edge
+```
+
+---
+
+### Decision 5: Screenshot Capture Policy
+
+| Option | Pros | Cons |
+|--------|------|------|
+| **A: Only on failure** | Smaller reports, faster tests | No proof of working state |
+| **B: All tests** | Full documentation, client proof | Larger reports, more storage |
+
+**Decision:** Option B - Capture screenshots for ALL tests (pass and fail)
+
+**Senior Architect Rationale:**
+1. **Client Disputes:** When clients claim "this broke after your update", you have timestamped visual proof of the site's working state.
+2. **Historical Record:** Screenshots serve as documentation of how the site looked at specific points in time.
+3. **Regression Detection:** Even "passing" tests provide valuable visual baselines.
+4. **Storage Trade-off:** Modern storage is cheap; visual proof is invaluable.
+
+---
+
 ## 8. Implementation Phases
 
 ### Phase 1: Foundation (Core Framework)
@@ -456,9 +503,80 @@ export const selectorOverrides = {
 - [ ] Write setup documentation
 - [ ] Add troubleshooting guide
 
+### Phase 6: WooCommerce Functional Testing
+- [ ] Add to Cart functionality
+- [ ] Cart page operations (update quantity, remove item)
+- [ ] Checkout flow (guest checkout)
+- [ ] Product variations (variable products)
+- [ ] Coupon code application
+- [ ] Mini-cart/AJAX cart updates
+- [ ] Product search functionality
+- [ ] Product filtering/sorting
+
 ---
 
-## 9. Screenshot Testing Strategy
+## 9. Test Status Definitions
+
+### Playwright Test Statuses
+
+| Status | Meaning | Action Required |
+|--------|---------|-----------------|
+| **Passed** | Test completed successfully on first attempt | None - working as expected |
+| **Failed** | Test did not pass after all retries | Investigate and fix |
+| **Flaky** | Test failed initially but passed on retry | Monitor - may indicate timing issues |
+| **Skipped** | Test was intentionally skipped | Review if skip is still necessary |
+| **Timed Out** | Test exceeded timeout limit | Increase timeout or optimize test |
+
+### Understanding Flaky Tests
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  FLAKY TEST                                                         │
+│  ─────────────────────────────────────────────────────────────────  │
+│  A test that sometimes passes and sometimes fails with the          │
+│  same code. Common causes:                                          │
+│                                                                     │
+│  • Network timing (slow API responses)                              │
+│  • Animation/transition timing                                      │
+│  • Race conditions in JavaScript                                    │
+│  • Third-party script loading (ads, analytics)                      │
+│  • Dynamic content (timestamps, random elements)                    │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Flaky Test Strategy:**
+1. Playwright auto-retries failed tests (configured: 1-2 retries)
+2. If passes on retry = marked "flaky" (not failed)
+3. Monitor flaky tests - too many indicates unstable tests
+4. Fix root cause when possible (add waits, stabilize selectors)
+
+### Skipped Tests
+
+Tests can be skipped intentionally:
+
+```typescript
+// Skip a single test
+test.skip('test name', async ({ page }) => { ... });
+
+// Skip conditionally
+test('test name', async ({ page }) => {
+  test.skip(process.env.CI === 'true', 'Skip in CI');
+  // test code
+});
+
+// Skip entire describe block
+test.describe.skip('Feature X', () => { ... });
+```
+
+**When to Skip:**
+- Feature not implemented on specific environment
+- Known bug being fixed separately
+- Environment-specific limitations
+- Tests for future functionality
+
+---
+
+## 10. Screenshot Testing Strategy
 
 ### Overview
 
@@ -623,7 +741,121 @@ Screenshot testing uses a **baseline comparison** approach:
 
 ---
 
-## 10. Per-Site Documentation
+## 11. WooCommerce Functional Testing
+
+### Overview
+
+Beyond visual regression testing, functional tests verify WooCommerce behavior works correctly. These tests interact with the site like a real user.
+
+### Test Categories
+
+#### Add to Cart Tests
+| Test ID | Test Case | Priority |
+|---------|-----------|----------|
+| CART-001 | Add simple product to cart | Must |
+| CART-002 | Add variable product to cart | Must |
+| CART-003 | Add product with quantity > 1 | Should |
+| CART-004 | Mini-cart updates after add | Should |
+| CART-005 | Cart count badge updates | Should |
+
+#### Cart Page Tests
+| Test ID | Test Case | Priority |
+|---------|-----------|----------|
+| CART-010 | View cart shows added products | Must |
+| CART-011 | Update product quantity | Must |
+| CART-012 | Remove product from cart | Must |
+| CART-013 | Cart totals calculate correctly | Must |
+| CART-014 | Apply valid coupon code | Should |
+| CART-015 | Invalid coupon shows error | Should |
+
+#### Checkout Tests
+| Test ID | Test Case | Priority |
+|---------|-----------|----------|
+| CHKOUT-001 | Guest checkout form loads | Must |
+| CHKOUT-002 | Required field validation | Must |
+| CHKOUT-003 | Order summary displays correctly | Must |
+| CHKOUT-004 | Payment method selection | Should |
+| CHKOUT-005 | Order confirmation page | Should |
+
+#### Product Tests
+| Test ID | Test Case | Priority |
+|---------|-----------|----------|
+| PROD-001 | Product gallery/images load | Must |
+| PROD-002 | Variable product options work | Must |
+| PROD-003 | Price updates with variation | Should |
+| PROD-004 | Stock status displays | Should |
+| PROD-005 | Related products show | Should |
+
+#### Search & Filter Tests
+| Test ID | Test Case | Priority |
+|---------|-----------|----------|
+| SRCH-001 | Product search returns results | Must |
+| SRCH-002 | No results message for invalid search | Should |
+| SRCH-003 | Category filtering works | Should |
+| SRCH-004 | Price sorting works | Should |
+
+### Implementation Approach
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  FUNCTIONAL TEST STRATEGY                                           │
+│  ─────────────────────────────────────────────────────────────────  │
+│                                                                     │
+│  1. Run on STAGING environments (not live)                          │
+│     - Avoids creating real orders                                   │
+│     - Safe to test payment flows                                    │
+│                                                                     │
+│  2. Use test products                                               │
+│     - Create dedicated test products on staging                     │
+│     - Known prices, SKUs, variations                                │
+│                                                                     │
+│  3. Clean up after tests                                            │
+│     - Clear cart between tests                                      │
+│     - Don't submit real payment info                                │
+│                                                                     │
+│  4. Mock payments (if possible)                                     │
+│     - Use test payment gateway                                      │
+│     - Or stop before final submit                                   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Example: Add to Cart Test
+
+```typescript
+// core/base-tests/cart.base.ts
+
+test('CART-001: Add simple product to cart', async ({ page }) => {
+  // Navigate to a product page
+  await page.goto(config.urls.testProduct);
+
+  // Click Add to Cart
+  await page.click(selectors.product.addToCartBtn);
+
+  // Wait for AJAX response
+  await page.waitForSelector(selectors.messages.addedToCart);
+
+  // Verify cart count updated
+  const cartCount = page.locator(selectors.header.cartCount);
+  await expect(cartCount).toHaveText('1');
+
+  // Verify mini-cart shows product
+  await page.hover(selectors.header.cartIcon);
+  await expect(page.locator(selectors.miniCart.productName)).toBeVisible();
+});
+```
+
+### Environment Recommendations
+
+| Test Type | Live Site | Staging Site |
+|-----------|-----------|--------------|
+| Screenshots (visual) | ✅ Safe | ✅ Safe |
+| Add to Cart | ⚠️ Caution | ✅ Recommended |
+| Checkout Flow | ❌ Avoid | ✅ Recommended |
+| Payment Tests | ❌ Never | ✅ With test gateway |
+
+---
+
+## 12. Per-Site Documentation
 
 Each site has its own documentation and configuration:
 
@@ -673,7 +905,7 @@ npm test -- --grep @newsite
 
 ---
 
-## 11. Open Questions
+## 13. Open Questions
 
 **For User Review:**
 
@@ -717,4 +949,4 @@ This architecture provides:
 
 *Document Location: `.claude/plans/qa-architecture.md`*
 *Last Updated: 2026-01-26*
-*Revision: 1.1 - Added Screenshot Testing Strategy*
+*Revision: 1.2 - Added Edge decision, test statuses, WooCommerce functional testing*
