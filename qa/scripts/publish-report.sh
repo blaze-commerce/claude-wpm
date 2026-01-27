@@ -59,14 +59,36 @@ fi
 # Create docs directory
 mkdir -p "$DOCS_DIR"
 
+# Get timestamp
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
 # Copy report to docs folder
 echo ""
 echo "Copying report to $DOCS_DIR..."
 rm -rf "$DOCS_DIR"/*
 cp -r "$QA_DIR/reports/html"/* "$DOCS_DIR/"
 
-# Get timestamp
-TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+# Inject navigation bar into the report
+echo "Injecting navigation bar..."
+REPORT_INDEX="$DOCS_DIR/index.html"
+if [ -f "$REPORT_INDEX" ]; then
+    python3 << PYEOF
+import re
+
+nav_html = '''<div id="blaze-nav" style="background:#0d1117;border-bottom:1px solid #30363d;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;font-family:-apple-system,BlinkMacSystemFont,sans-serif;position:sticky;top:0;z-index:9999;"><div style="display:flex;align-items:center;gap:16px;"><a href="../" style="color:#e6edf3;text-decoration:none;font-weight:600;font-size:14px;">← Back to Dashboard</a><span style="color:#30363d;">|</span><span style="color:#8b949e;font-size:13px;">birdbusta.net</span></div><div style="display:flex;align-items:center;gap:12px;"><span style="color:#3fb950;font-size:13px;">$TIMESTAMP</span><a href="https://github.com/blaze-commerce/claude-wpm" target="_blank" style="color:#58a6ff;text-decoration:none;font-size:13px;">GitHub</a></div></div>'''
+
+with open('$REPORT_INDEX', 'r') as f:
+    content = f.read()
+
+if 'blaze-nav' not in content:
+    content = re.sub(r'(<body[^>]*>)', r'\1' + nav_html, content, count=1)
+    with open('$REPORT_INDEX', 'w') as f:
+        f.write(content)
+    print("Navigation bar added.")
+else:
+    print("Navigation bar already exists.")
+PYEOF
+fi
 
 # Commit and push
 cd "$REPO_ROOT"
