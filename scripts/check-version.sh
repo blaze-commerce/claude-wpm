@@ -30,7 +30,7 @@ fi
 
 # If still unknown, check for VERSION file
 if [ "$CURRENT_VERSION" = "unknown" ] && [ -f "$CLAUDE_DIR/VERSION" ]; then
-    CURRENT_VERSION=$(cat "$CLAUDE_DIR/VERSION" | tr -d '[:space:]')
+    CURRENT_VERSION=$(tr -d '[:space:]' < "$CLAUDE_DIR/VERSION")
 fi
 
 echo -e "Current version: ${YELLOW}${CURRENT_VERSION}${NC}"
