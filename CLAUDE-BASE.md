@@ -277,3 +277,46 @@ https://my.kinsta.com/ -> Sites -> Tools -> Clear cache
 
 - Credentials in `wp-config.php`
 - Table prefix: Check `$table_prefix` in wp-config.php (usually `wp_`)
+
+---
+
+## Shell Script Development (For Claude)
+
+**IMPORTANT:** All shell scripts in `.claude/scripts/` must pass `shellcheck` validation. The GitHub Actions security workflow (`security-check.yml`) runs shellcheck on every push and will **block releases** if validation fails.
+
+### Before Creating or Modifying Shell Scripts
+
+Always run shellcheck locally before committing:
+
+```bash
+shellcheck -e SC1091 -e SC2034 scripts/*.sh
+```
+
+### Common Shellcheck Issues to Avoid
+
+| Code | Issue | Bad | Good |
+|------|-------|-----|------|
+| SC2001 | Use variable substitution instead of sed | `echo "$var" \| sed 's/^/  /'` | `while IFS= read -r line; do echo "  $line"; done <<< "$var"` |
+| SC2126 | Use grep -c instead of grep \| wc -l | `grep "x" \| wc -l` | `grep -c "x"` |
+| SC2086 | Quote variables | `$var` | `"$var"` |
+| SC2046 | Quote command substitution | `$(cmd)` | `"$(cmd)"` |
+
+### Excluded Checks
+
+These are already excluded in the workflow:
+- `SC1091` - Not following sourced files (external sources)
+- `SC2034` - Unused variables (often used for colors/config)
+
+### If Release Fails Due to Shellcheck
+
+1. Check the GitHub Actions log for the specific error
+2. Run `shellcheck scripts/your-script.sh` locally to see details
+3. Fix the issue (don't just suppress warnings unless justified)
+4. Commit the fix
+5. Delete and recreate the tag:
+   ```bash
+   git tag -d vX.Y.Z
+   git push origin :refs/tags/vX.Y.Z
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
