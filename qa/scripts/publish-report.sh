@@ -65,7 +65,7 @@ TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 # Copy report to docs folder
 echo ""
 echo "Copying report to $DOCS_DIR..."
-rm -rf "$DOCS_DIR"/*
+rm -rf "${DOCS_DIR:?}"/*
 cp -r "$QA_DIR/reports/html"/* "$DOCS_DIR/"
 
 # Inject navigation bar into the report
