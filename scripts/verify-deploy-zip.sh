@@ -142,7 +142,7 @@ echo -e "${YELLOW}[3/3] Checking zip structure...${NC}"
 NON_CLAUDE_FILES=$(echo "$ZIP_CONTENTS" | grep -v "^\.claude" | grep -v "^$" || true)
 if [ -n "$NON_CLAUDE_FILES" ]; then
     echo -e "  ${RED}✗ Files outside .claude/ directory:${NC}"
-    echo "$NON_CLAUDE_FILES" | sed 's/^/      /'
+    while IFS= read -r line; do echo "      $line"; done <<< "$NON_CLAUDE_FILES"
     ((ERRORS++))
 else
     echo -e "  ${GREEN}✓${NC} All files under .claude/"
@@ -166,7 +166,7 @@ echo ""
 echo -e "${BLUE}=== Summary ===${NC}"
 echo ""
 
-FILE_COUNT=$(echo "$ZIP_CONTENTS" | grep -v "/$" | wc -l | tr -d ' ')
+FILE_COUNT=$(echo "$ZIP_CONTENTS" | grep -cv "/$")
 echo "Total files in zip: $FILE_COUNT"
 
 if [ "$ERRORS" -eq 0 ]; then
