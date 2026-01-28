@@ -297,9 +297,11 @@ shellcheck -e SC1091 -e SC2034 scripts/*.sh
 | Code | Issue | Bad | Good |
 |------|-------|-----|------|
 | SC2001 | Use variable substitution instead of sed | `echo "$var" \| sed 's/^/  /'` | `while IFS= read -r line; do echo "  $line"; done <<< "$var"` |
+| SC2002 | Useless cat - use input redirection | `cat file \| cmd` | `cmd < file` |
 | SC2126 | Use grep -c instead of grep \| wc -l | `grep "x" \| wc -l` | `grep -c "x"` |
 | SC2086 | Quote variables | `$var` | `"$var"` |
 | SC2046 | Quote command substitution | `$(cmd)` | `"$(cmd)"` |
+| SC2115 | Protect rm -rf from empty vars | `rm -rf "$dir"/*` | `rm -rf "${dir:?}"/*` |
 
 ### Excluded Checks
 
