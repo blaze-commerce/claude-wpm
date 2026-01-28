@@ -31,17 +31,38 @@ zip -r "$OUTPUT_DIR/$OUTPUT_FILE" .claude \
     -x ".claude/qa/*" \
     -x ".claude/cache/*" \
     -x ".claude/plans/*" \
+    -x ".claude/docs/*" \
+    -x ".claude/.github/*" \
+    -x ".claude/README.md" \
     -x ".claude/CONTRIBUTING.md" \
+    -x ".claude/LICENSE" \
+    -x ".claude/FILE_MAPPING.md" \
+    -x ".claude/.gitignore" \
     -x ".claude/settings.local.json" \
+    -x ".claude/scripts/create-deploy-zip.sh" \
+    -x ".claude/scripts/verify-deploy-zip.sh" \
     -x "*.DS_Store" \
     -x "*.swp" \
     -x "*.swo"
 
 echo ""
-echo -e "${GREEN}Success!${NC}"
+echo -e "${GREEN}Zip created!${NC}"
 echo "Created: $OUTPUT_DIR/$OUTPUT_FILE"
 echo ""
-echo "Next steps:"
-echo "  1. Go to GitHub Releases"
-echo "  2. Create new release with tag v$VERSION"
-echo "  3. Upload: $OUTPUT_DIR/$OUTPUT_FILE"
+
+# Run verification
+echo -e "${YELLOW}Running verification...${NC}"
+if "$SCRIPT_DIR/verify-deploy-zip.sh" "$OUTPUT_DIR/$OUTPUT_FILE"; then
+    echo ""
+    echo -e "${GREEN}=== Ready for Release ===${NC}"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Go to GitHub Releases"
+    echo "  2. Create new release with tag v$VERSION"
+    echo "  3. Upload: $OUTPUT_DIR/$OUTPUT_FILE"
+else
+    echo ""
+    echo -e "${RED}=== Verification Failed ===${NC}"
+    echo "Please fix the issues above before releasing."
+    exit 1
+fi

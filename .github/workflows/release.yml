@@ -54,15 +54,22 @@ jobs:
           # Create .claude directory structure for deployment
           mkdir -p deploy-staging/.claude
 
-          # Copy files to staging (excluding dev/test folders)
+          # Copy files to staging (excluding [REPO] and [GHP] files)
           rsync -av --exclude='.git/' \
                     --exclude='qa/' \
                     --exclude='cache/' \
                     --exclude='plans/' \
                     --exclude='.github/' \
-                    --exclude='docs/qa-report/' \
+                    --exclude='docs/' \
                     --exclude='node_modules/' \
                     --exclude='settings.local.json' \
+                    --exclude='README.md' \
+                    --exclude='CONTRIBUTING.md' \
+                    --exclude='LICENSE' \
+                    --exclude='FILE_MAPPING.md' \
+                    --exclude='.gitignore' \
+                    --exclude='scripts/create-deploy-zip.sh' \
+                    --exclude='scripts/verify-deploy-zip.sh' \
                     --exclude='.DS_Store' \
                     --exclude='*.swp' \
                     --exclude='*.swo' \
@@ -85,6 +92,70 @@ jobs:
 
           echo "✅ Created packages:"
           ls -la claude-wpm-deploy*.zip
+
+      - name: Verify deploy zip contents
+        run: |
+          echo "🔍 Verifying deploy zip contents..."
+          echo "📋 Reading required files from FILE_MAPPING.md (single source of truth)"
+          echo ""
+
+          # Get zip contents
+          ZIP_CONTENTS=$(unzip -l claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip | tail -n +4 | head -n -2 | awk '{print $4}')
+
+          ERRORS=0
+
+          # Read required files from FILE_MAPPING.md - extract [WPM] labeled files
+          echo "Checking required files (from FILE_MAPPING.md [WPM] entries)..."
+          while IFS= read -r line; do
+            # Remove "- " prefix and " [WPM]" suffix
+            file=$(echo "$line" | sed 's/^- //' | sed 's/ \[WPM\]$//')
+            if [[ -n "$file" ]]; then
+              # Prepend .claude/ for zip path
+              zip_path=".claude/$file"
+              if echo "$ZIP_CONTENTS" | grep -q "^${zip_path}$"; then
+                echo "  ✓ $zip_path"
+              else
+                echo "  ✗ MISSING: $zip_path"
+                ERRORS=$((ERRORS + 1))
+              fi
+            fi
+          done < <(grep '\[WPM\]$' FILE_MAPPING.md | grep -v '^\s*#')
+
+          # Check forbidden files are NOT included (these are [REPO] and [GHP] files)
+          echo ""
+          echo "Checking for forbidden files..."
+          FORBIDDEN_PATTERNS=(
+            ".claude/qa/"
+            ".claude/plans/"
+            ".claude/cache/"
+            ".github/"
+            "docs/"
+            "node_modules/"
+            ".claude/CONTRIBUTING.md"
+            ".claude/LICENSE"
+            ".claude/FILE_MAPPING.md"
+            ".gitignore"
+          )
+
+          for pattern in "${FORBIDDEN_PATTERNS[@]}"; do
+            if echo "$ZIP_CONTENTS" | grep -q "^${pattern}"; then
+              echo "  ✗ FORBIDDEN files found: $pattern"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "  ✓ No $pattern"
+            fi
+          done
+
+          echo ""
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "❌ Verification FAILED with $ERRORS errors"
+            exit 1
+          else
+            echo "✅ Verification PASSED"
+            echo ""
+            echo "Zip contents:"
+            unzip -l claude-wpm-deploy-${{ steps.version.outputs.VERSION }}.zip
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

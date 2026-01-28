@@ -1,0 +1,107 @@
+name: Update File Mapping
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hooks/**'
+      - 'skills/**'
+      - 'commands/**'
+      - 'scripts/**'
+      - 'plans/**'
+      - 'qa/**'
+      - 'docs/**'
+      - '*.md'
+      - '*.json'
+      - '.github/**'
+      - '.gitignore'
+
+permissions:
+  contents: write
+
+jobs:
+  update-mapping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate file inventory
+        run: |
+          echo "📋 Generating file inventory..."
+
+          # Function to determine file category
+          get_category() {
+            local file="$1"
+
+            # WPM-QA files (Quality Assurance - docs & testing)
+            if [[ "$file" == docs/* ]] || [[ "$file" == qa/* ]]; then
+              echo "[WPM-QA]"
+              return
+            fi
+
+            # Repo-only files
+            if [[ "$file" == .github/* ]] || \
+               [[ "$file" == .gitignore ]] || \
+               [[ "$file" == CONTRIBUTING.md ]] || \
+               [[ "$file" == LICENSE ]] || \
+               [[ "$file" == README.md ]] || \
+               [[ "$file" == FILE_MAPPING.md ]] || \
+               [[ "$file" == plans/* ]] || \
+               [[ "$file" == cache/* ]] || \
+               [[ "$file" == settings.local.json ]] || \
+               [[ "$file" == scripts/create-deploy-zip.sh ]] || \
+               [[ "$file" == scripts/verify-deploy-zip.sh ]]; then
+              echo "[REPO]"
+              return
+            fi
+
+            # Everything else is WPM deploy
+            echo "[WPM]"
+          }
+
+          # Generate inventory
+          INVENTORY=""
+          while IFS= read -r file; do
+            if [[ -n "$file" ]]; then
+              category=$(get_category "$file")
+              INVENTORY="${INVENTORY}- ${file} ${category}\n"
+            fi
+          done < <(find . -type f \
+            -not -path './.git/*' \
+            -not -path './docs/qa-report/data/*' \
+            -not -name '.DS_Store' \
+            -not -name '*.swp' \
+            -not -name '*.swo' \
+            | sed 's|^\./||' | sort)
+
+          # Read current FILE_MAPPING.md
+          if [[ -f FILE_MAPPING.md ]]; then
+            # Extract content before and after the auto-generated section
+            BEFORE=$(sed -n '1,/<!-- AUTO-GENERATED: FILE_INVENTORY_START -->/p' FILE_MAPPING.md)
+            AFTER=$(sed -n '/<!-- AUTO-GENERATED: FILE_INVENTORY_END -->/,$p' FILE_MAPPING.md)
+
+            # Rebuild the file
+            {
+              echo "$BEFORE"
+              echo -e "$INVENTORY"
+              echo "$AFTER"
+            } > FILE_MAPPING.md.tmp
+            mv FILE_MAPPING.md.tmp FILE_MAPPING.md
+
+            echo "✅ FILE_MAPPING.md updated"
+          else
+            echo "⚠️ FILE_MAPPING.md not found"
+          fi
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add FILE_MAPPING.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update file mapping [skip ci]"
+            git push
+            echo "✅ FILE_MAPPING.md updated and pushed"
+          fi

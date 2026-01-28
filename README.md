@@ -1,33 +1,48 @@
-# Claude Code WordPress Configuration
+# Claude WPM (WordPress Maintenance)
 
-Reusable Claude Code configuration for WordPress/WooCommerce projects hosted on Kinsta.
-
----
-
-## Important: Deployment vs Local Components
-
-This repository contains **two types of components** with different purposes:
-
-| Component | Location | Purpose | Deploy to Live Sites? |
-|-----------|----------|---------|----------------------|
-| Hooks | `hooks/` | Safety blocks for Claude Code | YES |
-| Skills | `skills/` | Specialist prompts | YES |
-| Commands | `commands/` | Workflow automation (`/wpm`) | YES |
-| Scripts | `scripts/` | Shell maintenance scripts | YES |
-| **QA Tests** | `qa/` | Cross-browser E2E testing | **NO - LOCAL ONLY** |
-| **Plans** | `plans/` | Architecture & reference docs | **NO - Reference only** |
-
-### The Golden Rule
+Claude Code configuration for WordPress/WooCommerce projects. This repository contains three distinct services:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  LIVE SITES (Kinsta):  hooks/ + skills/ + commands/ + scripts/     │
-│  LOCAL MACHINE ONLY:   qa/                                          │
-│  REFERENCE ONLY:       plans/                                       │
+│                         CLAUDE WPM SERVICES                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  [WPM]      WordPress Maintenance   → Deployed to Kinsta sites      │
+│             hooks, skills, commands, scripts                        │
+│                                                                     │
+│  [WPM-QA]   Quality Assurance       → GitHub Pages & local testing  │
+│             docs/, qa/, Playwright tests                            │
+│                                                                     │
+│  [REPO]     Repository              → Stays in GitHub only          │
+│             CI/CD, workflows, contributing docs                     │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Why?** The `qa/` folder contains Playwright tests that run on your MacBook. The `plans/` folder contains architecture documentation for reference.
+---
+
+## Service Overview
+
+| Service | Label | Purpose | Destination |
+|---------|-------|---------|-------------|
+| **WPM** | `[WPM]` | WordPress maintenance tools for Claude Code | Kinsta/WordPress sites |
+| **QA** | `[WPM-QA]` | Documentation & testing | GitHub Pages + local MacBook |
+| **Repo** | `[REPO]` | Development & CI/CD | GitHub repository only |
+
+### What Goes Where
+
+| Component | Label | Description |
+|-----------|-------|-------------|
+| `hooks/` | `[WPM]` | Safety blocks for dangerous commands |
+| `skills/` | `[WPM]` | Specialist prompts (WordPress, PHP, Security, DB) |
+| `commands/` | `[WPM]` | Workflow automation (`/wpm`) |
+| `scripts/` | `[WPM]` | Maintenance scripts (audit, update, etc.) |
+| `docs/` | `[WPM-QA]` | GitHub Pages documentation site |
+| `qa/` | `[WPM-QA]` | Playwright E2E tests (local MacBook) |
+| `plans/` | `[REPO]` | Architecture & reference docs |
+| `.github/` | `[REPO]` | CI/CD workflows |
+
+> **📋 See [FILE_MAPPING.md](FILE_MAPPING.md)** for the complete file inventory with labels.
 
 ---
 
@@ -49,8 +64,12 @@ This repository contains **two types of components** with different purposes:
 ├── commands/
 │   └── wpm.md              # /wpm - WordPress maintenance command
 ├── scripts/
+│   ├── audit-wpm.sh        # Compare local vs repo files
 │   ├── blz-wpm.sh          # Direct SSH maintenance script
-│   └── create-deploy-zip.sh # Build deployment package
+│   ├── check-version.sh    # Check for updates
+│   ├── create-deploy-zip.sh # Build deployment package [REPO]
+│   ├── update-claude-wpm.sh # Auto-update from GitHub releases
+│   └── verify-deploy-zip.sh # QA check before release [REPO]
 ├── settings.json           # Permissions and hook configuration
 │
 ├── plans/                  # Architecture & reference documentation
@@ -69,214 +88,194 @@ This repository contains **two types of components** with different purposes:
 
 ## Deployment Workflows
 
-### A. Deploy to New Live Site (Kinsta) - RECOMMENDED
+### A. Deploy to New Live Site (Kinsta)
 
-**Use GitHub Releases** - pre-built zip with `qa/` and `plans/` already excluded.
-
-**Step 0: Install Claude Code** (if not already installed)
-```bash
-# For production servers (recommended) - stable channel
-curl -fsSL https://claude.ai/install.sh | bash -s stable
-
-# Or latest channel (newest features, may have occasional issues)
-curl -fsSL https://claude.ai/install.sh | bash
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                    NEW SITE DEPLOYMENT FLOW                        │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  1. INSTALL       2. DOWNLOAD       3. UPLOAD         4. RUN       │
+│  ──────────       ───────────       ────────          ──────       │
+│                                                                    │
+│  ┌──────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐   │
+│  │  Claude  │    │ claude-   │    │  Kinsta   │    │  claude   │   │
+│  │  Code    │───▶│ wpm-      │───▶│  public/  │───▶│  /init    │   │
+│  │  CLI     │    │ deploy.zip│    │  .claude/ │    │  /wpm     │   │
+│  └──────────┘    └───────────┘    └───────────┘    └───────────┘   │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-> **Note:** npm installation (`npm install -g @anthropic-ai/claude-code`) is **deprecated**. Use the native installer above.
+| Step | Action | Command/Link |
+|------|--------|--------------|
+| 1 | Install Claude Code (if not installed) | `curl -fsSL https://claude.ai/install.sh \| bash -s stable` |
+| 2 | Download deploy zip | [claude-wpm-deploy.zip](https://github.com/blaze-commerce/claude-wpm/releases/latest/download/claude-wpm-deploy.zip) |
+| 3 | Upload & extract to `public/` | Via SSH or SFTP |
+| 4 | Run Claude & initialize | `claude` → `/init` → `/wpm` |
+
+> **Note:** Running `/init` again is safe - it regenerates the site's `CLAUDE.md` if you need to refresh it.
+
+### B. Updating an Existing Site
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  1. Go to: github.com/blaze-commerce/claude-wpm/releases            │
-│  2. Download: claude-wpm-deploy.zip                                 │
-│  3. Upload to Kinsta → Extract to public/                           │
-│  4. Start Claude Code:  claude                                      │
-│  5. Run /init  ← Generates site CLAUDE.md                          │
-│  6. Run /wpm   ← Optional: populates plugin inventory               │
+│                    EXISTING SITE UPDATE FLOW                        │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Step 1: AUDIT              Step 2: CHECK           Step 3: UPDATE │
+│   ─────────────              ────────────            ────────────── │
+│                                                                     │
+│   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐   │
+│   │ audit-wpm   │         │check-version│         │update-claude│   │
+│   │    .sh      │ ──────▶ │    .sh      │ ──────▶ │  -wpm.sh    │   │
+│   └─────────────┘         └─────────────┘         └─────────────┘   │
+│         │                       │                       │           │
+│         ▼                       ▼                       ▼           │
+│   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐   │
+│   │ Compare:    │         │ Local: v1.0 │         │ Downloads   │   │
+│   │ Local vs    │         │ Latest: v1.2│         │ latest zip  │   │
+│   │ Repo files  │         │             │         │ & updates   │   │
+│   └─────────────┘         └─────────────┘         └─────────────┘   │
+│         │                       │                       │           │
+│         ▼                       ▼                       ▼           │
+│   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐   │
+│   │ ✓ Present   │         │ "Update     │         │ ✓ Updated   │   │
+│   │ ✗ Missing   │         │  available!"│         │   to v1.2   │   │
+│   │ + Extra     │         │             │         │             │   │  
+│   └─────────────┘         └─────────────┘         └─────────────┘   │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Direct download link:**
-```
-https://github.com/blaze-commerce/claude-wpm/releases/latest/download/claude-wpm-deploy.zip
+**Commands:**
+```bash
+bash .claude/scripts/audit-wpm.sh      # 1. See what's different
+bash .claude/scripts/check-version.sh  # 2. Check version
+bash .claude/scripts/update-claude-wpm.sh  # 3. Update
 ```
 
-### Updating an Existing Site
+**Example audit output:**
+```
+[WPM] Files - Should be on Kinsta
+  ✓ CLAUDE-BASE.md
+  ✓ settings.json
+  ✗ MISSING: scripts/audit-wpm.sh    ← New file in repo
 
-When updating a site that already has `.claude/` installed:
+Extra Local Files
+  ? README.md (repo-only, can remove)
+  + custom-skill.md (your custom file)
+```
+
+> **Tip:** Claude reminds developers to check for updates at session start (configured in `CLAUDE-BASE.md`).
+
+**Alternative: Manual Update**
 
 ```bash
-# Download and overwrite existing files
 cd /path/to/wordpress
-unzip -o claude-wpm-deploy.zip
+unzip -o claude-wpm-deploy.zip   # -o = overwrite all
 ```
 
-**Unzip options:**
-| Flag | Behavior |
-|------|----------|
-| `-o` | Overwrite all (recommended for updates) |
-| `-n` | Never overwrite (keeps existing) |
-| `-u` | Only overwrite if zip is newer |
+---
 
-**Safe to overwrite:** The deploy zip excludes `cache/`, `settings.local.json`, and site-specific data.
+### C. Creating a New Release (Maintainers)
 
-**Caution:** If you've customized hooks, skills, or commands, use `-n` or back up first.
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    RELEASE CREATION FLOW                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Option A: Automatic (GitHub Actions)                              │
+│   ────────────────────────────────────                              │
+│                                                                     │
+│   Create Tag ──▶ Push ──▶ GitHub Actions ──▶ Release + Zip          │
+│   (v1.2.0)                 ┌────────────┐                           │
+│                            │ 1. Build   │                           │
+│                            │ 2. Verify  │ ← FILE_MAPPING.md         │
+│                            │ 3. Package │                           │
+│                            │ 4. Release │                           │
+│                            └────────────┘                           │
+│                                                                     │
+│   Option B: Manual (Local)                                          │
+│   ────────────────────────                                          │
+│                                                                     │
+│   Run Script ──▶ Verify ──▶ Upload to GitHub                        │
+│   ┌─────────────────────────────────┐                               │
+│   │ .claude/scripts/create-deploy-  │                               │
+│   │ zip.sh 1.2.0                    │                               │
+│   └─────────────────────────────────┘                               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-**What's in the deploy zip:**
+**Option A: Automatic (Recommended)**
+1. Create new tag: `git tag v1.2.0`
+2. Push: `git push origin v1.2.0`
+3. GitHub Actions builds, verifies, and publishes
+
+**Option B: Manual**
+```bash
+.claude/scripts/create-deploy-zip.sh 1.2.0
+# Creates: dist/claude-wpm-deploy-1.2.0.zip
+# Upload to GitHub Releases manually
+```
+
+**What's in the deploy zip (`[WPM]` files only):**
 ```
 .claude/
-├── CLAUDE-BASE.md     Included
-├── README.md          Included
-├── hooks/             Included
-├── skills/            Included
-├── commands/          Included
-├── scripts/           Included
-├── settings.json      Included
-├── CONTRIBUTING.md    EXCLUDED (for repo contributors only)
-├── qa/                EXCLUDED (for local testing only)
-├── plans/             EXCLUDED (reference docs, stay in repo)
-└── cache/             EXCLUDED (temporary files)
+├── CLAUDE-BASE.md        [WPM] ✓
+├── settings.json         [WPM] ✓
+├── commands/             [WPM] ✓
+├── hooks/                [WPM] ✓
+├── skills/               [WPM] ✓
+├── scripts/              [WPM] ✓ (except create-deploy-zip, verify-deploy-zip)
+│
+├── README.md             [REPO] ✗ excluded
+├── plans/                [REPO] ✗ excluded
+├── qa/                   [WPM-QA] ✗ excluded
+├── docs/                 [WPM-QA] ✗ excluded
+└── .github/              [REPO] ✗ excluded
 ```
 
 ---
 
-### Creating a New Release (Maintainers)
+## Local Development [WPM-QA]
 
-**Option 1: Automatic (GitHub Actions)**
-
-1. Go to GitHub → Releases → "Create a new release"
-2. Create new tag: `v1.0.0` (use semantic versioning)
-3. Add release notes
-4. Click "Publish release"
-5. GitHub Actions automatically builds and attaches `claude-wpm-deploy.zip`
-
-**Option 2: Manual (Local)**
-
-```bash
-# On your MacBook
-cd claude-wpm
-.claude/scripts/create-deploy-zip.sh 1.0.0
-
-# Creates: dist/claude-wpm-deploy-1.0.0.zip
-# Then upload to GitHub Release manually
-```
-
----
-
-### B. Setup Local QA Testing (Your MacBook)
+### Setup QA Testing (Your MacBook)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  1. Clone full repo to MacBook                                      │
-│  2. cd claude-wpm/.claude/qa                                        │
-│  3. npm install                                                     │
-│  4. npx playwright install  (downloads browsers)                    │
-│  5. Update sites/<site>/site.config.ts with real URLs               │
-│  6. npm test                                                        │
+│                    LOCAL QA TESTING FLOW                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   Your MacBook                              Live Kinsta Site        │
+│   ────────────                              ────────────────        │
+│                                                                     │
+│   ┌───────────────┐        HTTPS           ┌───────────────┐       │
+│   │  Playwright   │ ─────────────────────▶ │  WordPress    │       │
+│   │  + Node.js    │    Tests run like a    │  WooCommerce  │       │
+│   │  qa/ folder   │    real browser user   │               │       │
+│   └───────────────┘                        └───────────────┘       │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**How QA tests work:**
-```
-┌──────────────────┐         HTTPS         ┌──────────────────┐
-│  Your MacBook    │ ───────────────────▶  │  Live Kinsta     │
-│                  │                       │  Site            │
-│  - Playwright    │   Tests run like a    │                  │
-│  - qa/ folder    │   real browser user   │  birdbusta.net   │
-│  - Node.js       │                       │  WooCommerce     │
-└──────────────────┘                       └──────────────────┘
+**Setup steps:**
+```bash
+git clone git@github.com:blaze-commerce/claude-wpm.git
+cd claude-wpm/qa
+npm install
+npx playwright install    # Downloads browsers
 ```
 
-The tests run **FROM** your local machine, testing the live site via HTTP.
-They do NOT run on the server.
-
----
-
-### C. Quick Reference
-
-| Task | Where | Command |
-|------|-------|---------|
-| Install Claude Code | Server/Local | `curl -fsSL https://claude.ai/install.sh \| bash -s stable` |
-| Deploy to live site | Server | Download from GitHub Releases |
-| Run maintenance | Live site | `/wpm` via Claude Code |
-| Run E2E tests | Local MacBook | `cd .claude/qa && npm test` |
-| Add new test site | Local MacBook | Copy `qa/sites/_template/` |
-| View architecture docs | Repo | See `plans/` folder |
-
----
-
-## Quick Setup (Live Site)
-
-**Step-by-step:**
-
-0. **Install Claude Code** (if not already installed)
-   ```bash
-   # Stable channel recommended for production
-   curl -fsSL https://claude.ai/install.sh | bash -s stable
-   ```
-
-1. **Download deploy zip** from GitHub Releases (NOT the "Download ZIP" button)
-   - The deploy zip excludes `qa/` and `plans/` folders automatically
-
-2. **Upload to Kinsta** and extract to WordPress root (`public/`)
-
-3. **Start Claude Code** in that directory
-
-4. **Run `/init`** - This generates a site-specific `CLAUDE.md` with:
-   - Directory structure
-   - Detected plugins/themes
-   - Project-specific details
-
-5. **(Optional) Run `/wpm`** - Populates the plugin inventory section
-
-The reusable instructions in `.claude/CLAUDE-BASE.md` are auto-loaded alongside your site-specific `CLAUDE.md`.
-
-## Recommended CLAUDE.md Structure
-
-After running `/init`, ensure your `CLAUDE.md` includes these sections for full compatibility with `/wpm`:
-
-```markdown
-# CLAUDE.md
-
-## Site Overview
-[Brief description of the site - type, theme, purpose]
-
-## Directory Structure
-[Generated by /init]
-
-## Child Theme Customizations
-| File | Purpose |
-|------|---------|
-[Document key custom files]
-
-## Key Plugins
-[Categorize important plugins: E-commerce, Payments, Shipping, SEO, etc.]
-
-## Custom Endpoints / APIs
-[Document any custom REST endpoints]
-
-## Plugin Inventory
-
-**Last updated:** [DATE] via `/wpm`
-
-This section is auto-updated when running `/wpm`. New plugins are marked with `<- NEW`.
-
-### Active Plugins
-
-| Plugin | Version | Notes |
-|--------|---------|-------|
-
-### Inactive Plugins
-
-| Plugin | Version | Notes |
-|--------|---------|-------|
-
-### Must-Use Plugins
-
-| Plugin | Version | Notes |
-|--------|---------|-------|
+**Run tests:**
+```bash
+npm test                  # All tests, all browsers
+npm run test:chrome       # Chrome only
+npm run test:headed       # Watch tests visually
 ```
 
-**Important:** The `## Plugin Inventory` section with the table format is required for `/wpm` to auto-update plugin lists.
+> Tests run FROM your MacBook, testing live sites via HTTPS. They do NOT run on the server.
 
 ## Features
 
@@ -297,49 +296,15 @@ Invoke with `/skill-name`:
 ### Commands
 - `/wpm` - WordPress Maintenance (updates core, plugins, themes in correct order)
 
-### QA Testing (Local Only)
-
-Cross-browser WooCommerce testing using Playwright. **Runs on your MacBook, not on servers.**
-
-**Browsers supported:** Chrome, Firefox, Safari, Edge + Mobile viewports
-
-**Test modules:**
-| Module | Coverage |
-|--------|----------|
-| `shop-page.spec.ts` | Add to cart from shop/category pages |
-| `single-product.spec.ts` | Product page, variations, quantity |
-| `cart.spec.ts` | Cart updates, coupons, removal |
-| `checkout.spec.ts` | Billing, shipping, payment flow |
-
-**Commands (run from `qa/` directory):**
-```bash
-npm test                 # All tests, all browsers
-npm run test:chrome      # Chrome only
-npm run test:safari      # Safari only
-npm run test:headed      # Watch tests run visually
-npm run test:ui          # Interactive test UI
-```
-
-**Adding a new site:**
-1. Copy `qa/sites/_template/` to `qa/sites/newsite.com/`
-2. Edit `site.config.ts` with correct URLs
-3. Update `test-data.ts` with test products
-4. Run: `npm test -- --grep @newsite`
-
-See `plans/blaze-qa-test-framework.md` for complete test code and implementation details.
-
 ---
 
 ### Reference Documentation
 
-The `plans/` folder contains architecture and reference documentation:
-
-| Document | Purpose |
-|----------|---------|
-| `claude-wpm-master-plan.md` | Master plan with prompts, checklists, and architecture decisions |
-| `blaze-qa-test-framework.md` | Complete Playwright test code ready to implement |
-
-These documents are committed to git for reference but excluded from deployment packages.
+| Document | Location | Purpose |
+|----------|----------|---------|
+| `FILE_MAPPING.md` | Repo root | Complete file inventory (auto-updated) |
+| `plans/claude-wpm-master-plan.md` | `[REPO]` | Master plan and architecture |
+| `plans/blaze-qa-test-framework.md` | `[REPO]` | Playwright test implementation |
 
 ---
 
@@ -350,38 +315,42 @@ These documents are committed to git for reference but excluded from deployment 
 | Hooks | [claude-code-mastery](https://github.com/TheDecipherist/claude-code-mastery) |
 | Skills | [awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) |
 
-## Auto-Update Check
+> Claude checks these repositories for updates at session start (configured in `CLAUDE-BASE.md`).
 
-Claude is instructed (in CLAUDE-BASE.md) to check the source repositories at the start of each session for new hooks/skills.
+---
 
-## Repository Structure Summary
+## File Mapping & Release Verification Workflow
+
+When you add, remove, or modify files, here's what happens automatically:
 
 ```
-claude-wpm/                    # Git repository root
-├── .claude/                   # This folder
-│   ├── hooks/                 # Deploy to live sites
-│   ├── skills/                # Deploy to live sites
-│   ├── commands/              # Deploy to live sites
-│   ├── scripts/               # Deploy to live sites
-│   ├── plans/                 # Reference docs (in git, not deployed)
-│   │   ├── blaze-qa-test-framework.md
-│   │   └── claude-wpm-master-plan.md
-│   ├── qa/                    # LOCAL ONLY - never deploy
-│   │   ├── sites/
-│   │   │   ├── birdbusta.net/
-│   │   │   └── _template/
-│   │   └── shared/
-│   └── cache/                 # EXCLUDED & gitignored
-├── .github/workflows/         # GitHub Actions
-└── README.md
+┌─────────────────────────────────────────────────────────────────────────┐
+│  1. You add/remove files → Push to main                                 │
+│                    ↓                                                    │
+│  2. GitHub Actions runs update-mapping.yml                              │
+│     • Uses `find` command to discover all files                         │
+│     • Labels each: [WPM], [WPM-QA], or [REPO]                           │
+│     • Updates FILE_MAPPING.md automatically                             │
+│                    ↓                                                    │
+│  3. On release (tag push), release.yml runs                             │
+│     • Creates deploy zip                                                │
+│     • verify-deploy-zip.sh reads [WPM] files from FILE_MAPPING.md       │
+│     • Verifies zip contains all required files                          │
+│     • Blocks release if verification fails                              │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Legend:**
-- Deploy = Included in deploy zip (for live sites)
-- Reference = In git repo, excluded from deploy zip (reference only)
-- Local = Local MacBook only (excluded from deploy)
-- Excluded = Excluded from deploy zip & gitignored
-- Automation = GitHub Actions (excluded from deploy zip)
+**Key points:**
+- `FILE_MAPPING.md` is the **single source of truth**
+- No hardcoded file lists to maintain manually
+- Adding a new skill/hook automatically updates the verification checklist
+- Release blocked if required files are missing from deploy zip
+
+**Example:** Adding a new skill
+1. Create `skills/my-new-skill.md`
+2. Push to main
+3. FILE_MAPPING.md auto-updates with `- skills/my-new-skill.md [WPM]`
+4. Next release: verification will check for this file in the zip
 
 ---
 
