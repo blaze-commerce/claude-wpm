@@ -27,6 +27,11 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
+      - name: Update VERSION file
+        run: |
+          echo "${{ steps.version.outputs.VERSION }}" > VERSION
+          echo "Updated VERSION file to: $(cat VERSION)"
+
       - name: Generate changelog
         id: changelog
         run: |

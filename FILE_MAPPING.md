@@ -25,6 +25,7 @@ wordpress-site/
 └── .claude/
     ├── CLAUDE-BASE.md
     ├── settings.json
+    ├── VERSION              ← Version tracking for check-version.sh
     │
     ├── commands/
     │   └── wpm.md
