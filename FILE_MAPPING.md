@@ -68,6 +68,7 @@ All files in this repository with their deployment category:
 - FILE_MAPPING.md [REPO]
 - LICENSE [REPO]
 - README.md [REPO]
+- VERSION [WPM]
 - commands/wpm.md [WPM]
 - docs/index.html [WPM-QA]
 - docs/premium-plugins-list.md [WPM-QA]
