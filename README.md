@@ -149,10 +149,20 @@ Claude Code configuration for WordPress/WooCommerce projects. This repository co
 ```
 
 **Commands:**
+
 ```bash
-bash .claude/scripts/audit-wpm.sh      # 1. See what's different
-bash .claude/scripts/check-version.sh  # 2. Check version
-bash .claude/scripts/update-claude-wpm.sh -y  # 3. Update (use -y to skip confirmation)
+# 1. See what's different
+bash .claude/scripts/audit-wpm.sh
+```
+
+```bash
+# 2. Check version
+bash .claude/scripts/check-version.sh
+```
+
+```bash
+# 3. Update (use -y to skip confirmation)
+bash .claude/scripts/update-claude-wpm.sh -y
 ```
 
 **Example audit output:**

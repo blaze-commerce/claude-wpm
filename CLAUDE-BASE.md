@@ -30,11 +30,24 @@ Reusable instructions for Claude Code on WordPress/WooCommerce sites.
 
 > **Setup Check:** If there is no `CLAUDE.md` file in the project root, remind the user to run `/init` to generate site-specific documentation.
 
-> **Version Check:** At the start of new sessions, remind the user they can check for claude-wpm updates by running:
-> ```bash
-> bash .claude/scripts/check-version.sh
-> ```
-> If an update is available, they can run `bash .claude/scripts/update-claude-wpm.sh -y` to auto-update.
+> **Version Check:** At the start of new sessions, remind the user they can check for updates.
+
+**Maintenance Commands** (copy & paste ready):
+
+```bash
+# Check for updates
+bash .claude/scripts/check-version.sh
+```
+
+```bash
+# Update to latest version
+bash .claude/scripts/update-claude-wpm.sh -y
+```
+
+```bash
+# Audit local files vs repo
+bash .claude/scripts/audit-wpm.sh
+```
 
 ## Configuration Sources
 
