@@ -152,7 +152,7 @@ Claude Code configuration for WordPress/WooCommerce projects. This repository co
 ```bash
 bash .claude/scripts/audit-wpm.sh      # 1. See what's different
 bash .claude/scripts/check-version.sh  # 2. Check version
-bash .claude/scripts/update-claude-wpm.sh  # 3. Update
+bash .claude/scripts/update-claude-wpm.sh -y  # 3. Update (use -y to skip confirmation)
 ```
 
 **Example audit output:**

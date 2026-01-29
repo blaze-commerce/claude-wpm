@@ -34,7 +34,7 @@ Reusable instructions for Claude Code on WordPress/WooCommerce sites.
 > ```bash
 > bash .claude/scripts/check-version.sh
 > ```
-> If an update is available, they can run `bash .claude/scripts/update-claude-wpm.sh` to auto-update.
+> If an update is available, they can run `bash .claude/scripts/update-claude-wpm.sh -y` to auto-update.
 
 ## Configuration Sources
 
