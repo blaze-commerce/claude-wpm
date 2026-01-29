@@ -129,9 +129,11 @@ echo -e "${BLUE}Version Info${NC}"
 echo -e "${BLUE}════════════════════════════════════════════════════════════════${NC}"
 echo ""
 
-# Try to get local version
+# Try to get local version (check VERSION file first, then fallback)
 LOCAL_VERSION="unknown"
-if [ -f "$CLAUDE_DIR/CLAUDE-BASE.md" ]; then
+if [ -f "$CLAUDE_DIR/VERSION" ]; then
+    LOCAL_VERSION=$(tr -d '[:space:]' < "$CLAUDE_DIR/VERSION")
+elif [ -f "$CLAUDE_DIR/CLAUDE-BASE.md" ]; then
     LOCAL_VERSION=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' "$CLAUDE_DIR/CLAUDE-BASE.md" 2>/dev/null | head -1 || echo "unknown")
 fi
 
