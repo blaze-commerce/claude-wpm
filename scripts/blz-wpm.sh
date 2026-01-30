@@ -76,6 +76,7 @@ enable_maintenance_mode() {
         fi
 
         # Enable maintenance mode by creating .maintenance file
+        # shellcheck disable=SC2016
         echo '<?php $upgrading = time(); ?>' > .maintenance
         MAINTENANCE_METHOD="custom"
         echo "✓ Custom maintenance mode enabled"
