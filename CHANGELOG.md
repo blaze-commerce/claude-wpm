@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [v1.3.1] - 2026-01-29
 
 ### Added
-- Maintenance mode integration in `update-premium-plugins.sh`
+- Maintenance mode integration in `update-premium-plugins.sh` (auto-enable before, auto-disable after)
 - Additional premium plugin patterns: `astra-addon`, `ultimate-elementor`, `oxygen`, `oxy-*`, `oxyultimate*`
+- `CHANGELOG.md` for tracking issues, fixes, and dates
 
 ### Fixed
+- Live site not in maintenance mode during premium plugin updates
 - Premium plugins not updating due to missing patterns in detection
 
 ---
