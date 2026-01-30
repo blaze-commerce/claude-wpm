@@ -30,6 +30,104 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
+# ------------------------------------------------------
+# Maintenance Mode Functions (REQUIRED for all updates)
+# ------------------------------------------------------
+
+enable_maintenance_mode() {
+    if ! command -v wp &> /dev/null; then
+        log_warn "WP-CLI not available - cannot enable maintenance mode"
+        return
+    fi
+
+    echo ""
+    echo "┌─────────────────────────────────────────────────────────────────────┐"
+    echo "│  🔒 ENABLING MAINTENANCE MODE                                       │"
+    echo "└─────────────────────────────────────────────────────────────────────┘"
+
+    # Check if ASE Pro is active
+    if wp plugin is-active admin-site-enhancements-pro 2>/dev/null; then
+        log_info "ASE Pro detected - using ASE maintenance mode"
+        wp option patch update admin_site_enhancements maintenance_mode 1
+        MAINTENANCE_METHOD="ase"
+        log_info "✓ ASE Pro maintenance mode enabled"
+    else
+        log_warn "ASE Pro not active - using custom maintenance mode"
+        echo ""
+        echo "  ⚠️  WARNING: Custom maintenance mode may not work perfectly with"
+        echo "     CDN caching. For reliable maintenance mode, install ASE Pro."
+        echo ""
+
+        # Create maintenance.php if it doesn't exist
+        if [ ! -f "$WP_ROOT/wp-content/maintenance.php" ]; then
+            log_info "Creating wp-content/maintenance.php..."
+            cat > "$WP_ROOT/wp-content/maintenance.php" << 'MAINTENANCE_EOF'
+<?php
+header('HTTP/1.1 503 Service Unavailable');
+header('Status: 503 Service Unavailable');
+header('Retry-After: 3600');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { color: #333; margin-bottom: 15px; font-size: 2rem; }
+        p { color: #666; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>We'll be back soon.</h1>
+        <p>This site is undergoing maintenance.<br>Thanks for your patience.</p>
+    </div>
+</body>
+</html>
+MAINTENANCE_EOF
+        fi
+
+        # Enable maintenance mode
+        # shellcheck disable=SC2016
+        echo '<?php $upgrading = time(); ?>' > "$WP_ROOT/.maintenance"
+        MAINTENANCE_METHOD="custom"
+        log_info "✓ Custom maintenance mode enabled"
+    fi
+    echo ""
+}
+
+disable_maintenance_mode() {
+    if [ -z "$MAINTENANCE_METHOD" ]; then
+        return
+    fi
+
+    echo ""
+    echo "┌─────────────────────────────────────────────────────────────────────┐"
+    echo "│  🔓 DISABLING MAINTENANCE MODE                                      │"
+    echo "└─────────────────────────────────────────────────────────────────────┘"
+
+    if [ "$MAINTENANCE_METHOD" = "ase" ]; then
+        wp option patch update admin_site_enhancements maintenance_mode 0
+        log_info "✓ ASE Pro maintenance mode disabled"
+    elif [ "$MAINTENANCE_METHOD" = "custom" ]; then
+        rm -f "$WP_ROOT/.maintenance"
+        log_info "✓ Custom maintenance mode disabled"
+    fi
+    echo ""
+}
+
 # Known premium plugin patterns (plugins not from wordpress.org)
 PREMIUM_PATTERNS=(
     "-pro$"
@@ -49,7 +147,16 @@ PREMIUM_PATTERNS=(
     "^searchwp$"
     "^wp-rocket$"
     "^shortpixel-image-optimiser$"
+    "^astra-addon$"
+    "^ultimate-elementor$"
+    "^oxygen$"
+    "^oxygen-.*$"
+    "^oxy-.*$"
+    "^oxyultimate.*$"
 )
+
+# Track maintenance mode method
+MAINTENANCE_METHOD=""
 
 # Helper function to find latest zip file (SC2012 fix - use find instead of ls)
 find_latest_zip() {
@@ -408,11 +515,15 @@ main() {
                 exit 1
             fi
             sync_repo
+            enable_maintenance_mode
             update_plugin "$2"
+            disable_maintenance_mode
             ;;
         update-all)
             sync_repo
+            enable_maintenance_mode
             update_all
+            disable_maintenance_mode
             ;;
         detect)
             sync_repo

@@ -360,6 +360,7 @@ The `/wpm` command now **requires** maintenance mode before and after updates to
 
 | Document | Location | Purpose |
 |----------|----------|---------|
+| `CHANGELOG.md` | Repo root | Version history, issues, and fixes |
 | `FILE_MAPPING.md` | Repo root | Complete file inventory (auto-updated) |
 | `plans/claude-wpm-master-plan.md` | `[REPO]` | Master plan and architecture |
 | `plans/blaze-qa-test-framework.md` | `[REPO]` | Playwright test implementation |
