@@ -65,7 +65,7 @@ Claude Code configuration for WordPress/WooCommerce projects. This repository co
 │   └── wpm.md              # /wpm - WordPress maintenance command
 ├── scripts/
 │   ├── audit-wpm.sh        # Compare local vs repo files
-│   ├── blz-wpm.sh          # Direct SSH maintenance script
+│   ├── blz-wpm.sh          # Direct SSH maintenance script (with maintenance mode)
 │   ├── check-version.sh    # Check for updates
 │   ├── create-deploy-zip.sh # Build deployment package [REPO]
 │   ├── update-claude-wpm.sh # Auto-update from GitHub releases
@@ -304,7 +304,55 @@ Invoke with `/skill-name`:
 - `/senior-architect` - Architectural decisions, trade-off analysis, planning
 
 ### Commands
-- `/wpm` - WordPress Maintenance (updates core, plugins, themes in correct order)
+- `/wpm` - WordPress Maintenance (updates core, plugins, themes with mandatory maintenance mode)
+
+### Maintenance Mode (NEW)
+
+The `/wpm` command now **requires** maintenance mode before and after updates to prevent issues on WooCommerce sites (failed orders, broken checkout).
+
+**Two-Tier Approach:**
+
+| Method | When Used | How It Works |
+|--------|-----------|--------------|
+| **ASE Pro** (preferred) | Plugin is active | `wp option patch update admin_site_enhancements maintenance_mode 1` |
+| **Custom fallback** | ASE Pro not available | Creates `.maintenance` file in site root |
+
+**Update Flow:**
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    /wpm UPDATE SEQUENCE                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Step 0: ENABLE MAINTENANCE MODE (REQUIRED)                         │
+│  ───────────────────────────────────────────                        │
+│  Check ASE Pro → Use ASE method OR custom .maintenance fallback     │
+│                                                                     │
+│  Steps 1-5: UPDATES                                                 │
+│  ──────────────────                                                 │
+│  1. WordPress Core    → wp core update                              │
+│  2. Database          → wp core update-db                           │
+│  3. Free Plugins      → wp plugin update --all                      │
+│  4. Premium Plugins   → update-premium-plugins.sh                   │
+│  5. Themes            → wp theme update --all                       │
+│                                                                     │
+│  Step 6: DISABLE MAINTENANCE MODE (REQUIRED)                        │
+│  ────────────────────────────────────────────                       │
+│  Disable using same method that was used to enable                  │
+│                                                                     │
+│  Step 7: VERIFY & CLEANUP                                           │
+│  ────────────────────────                                           │
+│  - Verify site accessible (incognito browser)                       │
+│  - Update plugin inventory in CLAUDE.md                             │
+│  - Clear Kinsta cache (manually via dashboard)                      │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Important Notes:**
+- **Never skip maintenance mode** - WooCommerce sites can have failed orders during updates
+- **ASE Pro is preferred** - Works properly with Kinsta CDN
+- **Custom fallback limitation** - CDN-cached pages may still be visible to visitors
+- **Always disable** maintenance mode after updates, even if updates failed
 
 ---
 

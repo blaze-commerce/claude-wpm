@@ -6,6 +6,76 @@ Run WordPress core, plugin, and theme updates in the correct order, then update 
 
 Execute these commands in sequence:
 
+### 0. Enable Maintenance Mode (REQUIRED)
+
+**NEVER skip this step** - WooCommerce sites can have failed orders during updates.
+
+First, check if ASE Pro is active:
+```bash
+wp plugin is-active admin-site-enhancements-pro
+```
+
+**If ASE Pro is active (exit code 0):**
+```bash
+wp option patch update admin_site_enhancements maintenance_mode 1
+```
+Remember: `MAINTENANCE_METHOD="ase"`
+
+**If ASE Pro is NOT active (exit code 1), use custom fallback:**
+
+First, create `wp-content/maintenance.php` if it doesn't exist:
+```php
+<?php
+header('HTTP/1.1 503 Service Unavailable');
+header('Status: 503 Service Unavailable');
+header('Retry-After: 3600');
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 { color: #333; margin-bottom: 15px; font-size: 2rem; }
+        p { color: #666; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>We'll be back soon.</h1>
+        <p>This site is undergoing maintenance for an extended period today.<br>Thanks for your patience.</p>
+    </div>
+</body>
+</html>
+```
+
+Then enable maintenance mode:
+```bash
+echo '<?php $upgrading = time(); ?>' > .maintenance
+```
+Remember: `MAINTENANCE_METHOD="custom"`
+
+**Display warning for custom method:**
+```
+⚠️  WARNING: Using custom maintenance mode. This may not work perfectly
+    with CDN caching (cached pages may still be visible). For reliable
+    maintenance mode on Kinsta/CDN hosts, install ASE Pro.
+```
+
+---
+
 ### 1. WordPress Core Update
 ```bash
 wp core update
@@ -43,6 +113,27 @@ This pulls from `git@github.com:blaze-commerce/wp-premium-plugins.git` and updat
 ```bash
 wp theme update --all
 ```
+
+---
+
+### 6. Disable Maintenance Mode (REQUIRED)
+
+**Always disable maintenance mode after updates complete, even if updates failed/errored.**
+
+**If ASE Pro was used (`MAINTENANCE_METHOD="ase"`):**
+```bash
+wp option patch update admin_site_enhancements maintenance_mode 0
+```
+
+**If custom fallback was used (`MAINTENANCE_METHOD="custom"`):**
+```bash
+rm .maintenance
+```
+Note: Keep `wp-content/maintenance.php` for future use - only remove the `.maintenance` trigger file.
+
+**Verify maintenance mode is disabled** by checking the site in an incognito browser window.
+
+---
 
 ## Premium Plugin Reminder
 
@@ -172,8 +263,19 @@ Show brief confirmation:
 ## Final Reminders
 
 After completing all tasks, remind the user:
+- **VERIFY** maintenance mode is disabled (check site in incognito window)
 - **DO NOT** run `wp kinsta cache purge` (causes performance issues)
 - Manually clear cache via Kinsta dashboard: https://my.kinsta.com/ → Sites → Tools → Clear cache
+
+---
+
+## Important: Maintenance Mode Notes
+
+- **NEVER skip maintenance mode** - WooCommerce sites can have failed orders during updates
+- **ASE Pro is preferred** because it works properly with Kinsta CDN
+- The custom `.maintenance` method has limitations on CDN-cached sites (frontend may show cached pages while wp-admin shows maintenance)
+- **Always verify** maintenance mode is disabled after updates complete
+- **If update fails/errors**, still disable maintenance mode before stopping
 
 ## Output Summary
 
