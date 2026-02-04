@@ -364,7 +364,12 @@ update_all() {
                     continue
                 fi
 
-                if update_plugin "$plugin_name"; then
+                # Temporarily disable set -e to prevent PHP warnings from aborting the loop
+                set +e
+                update_plugin "$plugin_name"
+                local result=$?
+                set -e
+                if [ $result -eq 0 ]; then
                     ((updated++))
                 else
                     ((failed++))
