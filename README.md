@@ -373,8 +373,31 @@ The `/wpm` command now **requires** maintenance mode before and after updates to
 |-----------|--------|
 | Hooks | [claude-code-mastery](https://github.com/TheDecipherist/claude-code-mastery) |
 | Skills | [awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) |
+| WordPress Skills | [WordPress/agent-skills](https://github.com/WordPress/agent-skills) |
 
 > Claude checks these repositories for updates at session start (configured in `CLAUDE-BASE.md`).
+
+### WordPress Agent Skills
+
+Official WordPress AI agent skills from [github.com/WordPress/agent-skills](https://github.com/WordPress/agent-skills):
+
+| Skill | Description |
+|-------|-------------|
+| `wordpress-router` | Classifies WordPress repos and routes to the right workflow |
+| `wp-project-triage` | Detects project type, tooling, and versions automatically |
+| `wp-block-development` | Gutenberg blocks: block.json, attributes, rendering, deprecations |
+| `wp-block-themes` | Block themes: theme.json, templates, patterns, style variations |
+| `wp-plugin-development` | Plugin architecture, hooks, settings API, security |
+| `wp-rest-api` | REST API routes/endpoints, schema, auth, response shaping |
+| `wp-interactivity-api` | Frontend interactivity using data-wp-* directives and stores |
+| `wp-abilities-api` | Capability-based permissions and REST API authentication |
+| `wp-wpcli-and-ops` | WP-CLI commands, automation, multisite, search-replace |
+| `wp-performance` | Profiling, caching, database optimization, Server-Timing |
+| `wp-phpstan` | PHPStan static analysis for WordPress (config, baselines, WP-specific typing) |
+| `wp-playground` | WordPress Playground for instant local environments |
+| `wpds` | WordPress Design System |
+
+> See [Documentation](https://blaze-commerce.github.io/claude-wpm/reference/wordpress-skills/) for detailed usage.
 
 ---
 
