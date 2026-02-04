@@ -59,6 +59,7 @@ wordpress-site/
 All files in this repository with their deployment category:
 
 <!-- AUTO-GENERATED: FILE_INVENTORY_START -->
+- .github/workflows/deploy-docs.yml [REPO]
 - .github/workflows/release.yml [REPO]
 - .github/workflows/security-check.yml [REPO]
 - .github/workflows/update-mapping.yml [REPO]
