@@ -78,6 +78,8 @@ All files in this repository with their deployment category:
 - docs/package-lock.json [WPM-QA]
 - docs/package.json [WPM-QA]
 - docs/premium-plugins-list.md [WPM-QA]
+- docs/src/assets/logo-dark.svg [WPM-QA]
+- docs/src/assets/logo-light.svg [WPM-QA]
 - docs/src/assets/logo.svg [WPM-QA]
 - docs/src/content/config.ts [WPM-QA]
 - docs/src/content/docs/getting-started/installation.md [WPM-QA]
