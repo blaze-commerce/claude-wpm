@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.4.2] - 2026-02-04
+
+### Fixed
+- Updated `FILE_MAPPING.md` to mark `CHANGELOG.md` as `[REPO]` instead of `[WPM]`
+
+---
+
 ## [v1.4.1] - 2026-02-04
 
 ### Fixed

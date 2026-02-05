@@ -64,7 +64,7 @@ All files in this repository with their deployment category:
 - .github/workflows/security-check.yml [REPO]
 - .github/workflows/update-mapping.yml [REPO]
 - .gitignore [REPO]
-- CHANGELOG.md [WPM]
+- CHANGELOG.md [REPO]
 - CLAUDE-BASE.md [WPM]
 - CONTRIBUTING.md [REPO]
 - FILE_MAPPING.md [REPO]
