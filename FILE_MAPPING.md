@@ -246,6 +246,19 @@ All files in this repository with their deployment category:
 - skills/security-auditor.md [WPM]
 - skills/senior-architect.md [WPM]
 - skills/wordpress-master.md [WPM]
+- skills/wp-abilities-api.md [WPM]
+- skills/wp-block-development.md [WPM]
+- skills/wp-block-themes.md [WPM]
+- skills/wp-interactivity-api.md [WPM]
+- skills/wp-performance.md [WPM]
+- skills/wp-phpstan.md [WPM]
+- skills/wp-playground.md [WPM]
+- skills/wp-plugin-development.md [WPM]
+- skills/wp-project-triage.md [WPM]
+- skills/wp-rest-api.md [WPM]
+- skills/wp-router.md [WPM]
+- skills/wp-wpcli-ops.md [WPM]
+- skills/wpds.md [WPM]
 
 <!-- AUTO-GENERATED: FILE_INVENTORY_END -->
 
