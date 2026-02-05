@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.6.0] - 2026-02-05
+
+### Added
+- **Changelog Workflow** in CLAUDE-BASE.md - Sites must now maintain `CHANGELOG.md` to document changes
+  - Entry format guidelines (detailed for bug fixes, condensed for routine updates)
+  - Template for `/init` to create CHANGELOG.md if missing
+
+---
+
 ## [v1.5.0] - 2026-02-04
 
 ### Added
