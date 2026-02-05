@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.5.0] - 2026-02-04
+
+### Added
+- **13 WordPress Agent Skills** from [WordPress/agent-skills](https://github.com/WordPress/agent-skills):
+  - `wp-router` - Classify repos and route to correct workflow
+  - `wp-project-triage` - Detect project type, tooling, versions
+  - `wp-block-development` - Gutenberg blocks, block.json, deprecations
+  - `wp-block-themes` - theme.json, templates, patterns, style variations
+  - `wp-plugin-development` - Plugin architecture, hooks, settings API
+  - `wp-rest-api` - REST routes, schema, auth, response shaping
+  - `wp-interactivity-api` - data-wp-* directives and stores
+  - `wp-abilities-api` - Capability-based permissions
+  - `wp-wpcli-ops` - WP-CLI commands, automation, multisite
+  - `wp-performance` - Profiling, caching, database optimization
+  - `wp-phpstan` - Static analysis configuration
+  - `wp-playground` - Instant local environments
+  - `wpds` - WordPress Design System
+- Sites section in documentation with plugin inventory tracking
+- Dark/light mode logo support in docs
+
+### Fixed
+- Logo text color in dark mode (now uses separate SVG files)
+- `CHANGELOG.md` permanently marked as `[REPO]` in update-mapping workflow
+
+---
+
 ## [v1.4.2] - 2026-02-04
 
 ### Fixed
