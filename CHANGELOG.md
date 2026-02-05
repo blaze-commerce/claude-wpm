@@ -7,13 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [v1.4.0] - 2026-02-04
 
 ### Added
 - Documentation site migrated to Astro Starlight (industry standard)
 - WordPress Agent Skills reference (13 skills from [WordPress/agent-skills](https://github.com/WordPress/agent-skills))
 - Documentation pages: getting-started, guides, reference
 - `.gitignore` in docs to exclude `CHANGELOG.md` from deployment
+- GitHub Actions workflow for docs deployment to GitHub Pages
 
 ### Fixed
 - `update-premium-plugins.sh` update-all loop aborting on PHP warnings (set -e issue)
@@ -107,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Date | Issue | Fix | Version |
 |------|-------|-----|---------|
-| 2026-02-04 | update-all aborting on PHP warnings (Freemius SDK) | Disabled set -e during plugin loop | Unreleased |
+| 2026-02-04 | update-all aborting on PHP warnings (Freemius SDK) | Disabled set -e during plugin loop | v1.4.0 |
 | 2026-01-29 | Live site not in maintenance mode during premium plugin updates | Added maintenance mode to `update-premium-plugins.sh` | v1.3.1 |
 | 2026-01-29 | Premium plugins (astra-addon, ultimate-elementor) not detected | Added missing patterns to PREMIUM_PATTERNS array | v1.3.1 |
 | 2026-01-29 | shellcheck SC2016 failing CI | Added shellcheck disable comment for intentional single quotes | v1.3.0 |
