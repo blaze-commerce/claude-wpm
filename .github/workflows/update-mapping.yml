@@ -42,6 +42,7 @@ jobs:
             # Repo-only files
             if [[ "$file" == .github/* ]] || \
                [[ "$file" == .gitignore ]] || \
+               [[ "$file" == CHANGELOG.md ]] || \
                [[ "$file" == CONTRIBUTING.md ]] || \
                [[ "$file" == LICENSE ]] || \
                [[ "$file" == README.md ]] || \
