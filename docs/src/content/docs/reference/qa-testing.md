@@ -5,6 +5,10 @@ description: Playwright E2E testing for WordPress sites.
 
 Claude WPM includes a Playwright-based QA testing framework for end-to-end testing of WordPress sites.
 
+:::note
+Test reports are generated locally after running tests. See [Viewing Reports](#test-reports) below.
+:::
+
 ## Overview
 
 The QA framework runs **from your local MacBook** and tests **live sites via HTTPS**. Tests simulate real browser user interactions.

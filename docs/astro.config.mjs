@@ -10,7 +10,8 @@ export default defineConfig({
     starlight({
       title: 'Claude WPM',
       logo: {
-        src: './src/assets/logo.svg',
+        dark: './src/assets/logo-dark.svg',
+        light: './src/assets/logo-light.svg',
         replacesTitle: true,
       },
       social: {
