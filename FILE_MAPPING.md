@@ -90,6 +90,7 @@ All files in this repository with their deployment category:
 - docs/src/content/docs/reference/commands.md [WPM-QA]
 - docs/src/content/docs/reference/qa-testing.md [WPM-QA]
 - docs/src/content/docs/reference/wordpress-skills.md [WPM-QA]
+- docs/src/content/docs/sites/beaufort.md [WPM-QA]
 - docs/src/content/docs/sites/dancewear.md [WPM-QA]
 - docs/src/content/docs/sites/index.md [WPM-QA]
 - docs/src/content/docs/sites/shinetrim.md [WPM-QA]
