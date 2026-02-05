@@ -26,6 +26,60 @@ Reusable instructions for Claude Code on WordPress/WooCommerce sites.
 
 ---
 
+## IMPORTANT: Changelog Workflow
+
+**Update `CHANGELOG.md` when making changes to a site.** Document changes immediately after completing them (not before—you often don't know the full solution until you're done).
+
+### What to Document
+
+| Change Type | How to Document |
+|-------------|-----------------|
+| Bug fixes | **Always detailed** - Use Issue/Solution format below |
+| New features/customizations | **Always detailed** - Describe what and why |
+| Security patches | **Always detailed** - Note vulnerability and fix |
+| Routine updates (`/wpm`) | **Condensed** - "Updated X plugins to latest versions" |
+
+### Entry Formats
+
+**For bug fixes** (the most valuable documentation):
+```
+### Fixed
+- Brief description
+  - Issue: What was the problem?
+  - Solution: How was it fixed?
+```
+
+**For routine maintenance:**
+```
+### Changed
+- Updated 12 plugins to latest versions via `/wpm`
+- Updated WordPress core 6.4.2 → 6.4.3
+```
+
+### On /init
+
+When running `/init`, if `CHANGELOG.md` does not exist in the project root, create it with:
+
+```markdown
+# Changelog
+
+All notable changes to this website will be documented in this file.
+
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [Unreleased]
+
+## [YYYY-MM-DD]
+
+### Added
+- **CLAUDE.md** - Site-specific documentation for Claude Code
+- **CHANGELOG.md** - Track all site changes, issues, and solutions
+```
+
+Replace `[YYYY-MM-DD]` with the current server date.
+
+---
+
 ## Quick Checks
 
 > **Setup Check:** If there is no `CLAUDE.md` file in the project root, remind the user to run `/init` to generate site-specific documentation.
