@@ -46,6 +46,7 @@ wordpress-site/
         ├── audit-wpm.sh
         ├── blz-wpm.sh
         ├── check-version.sh
+        ├── notify-slack.sh
         ├── update-claude-wpm.sh
         └── update-premium-plugins.sh
 ```
@@ -240,6 +241,7 @@ All files in this repository with their deployment category:
 - scripts/blz-wpm.sh [WPM]
 - scripts/check-version.sh [WPM]
 - scripts/create-deploy-zip.sh [REPO]
+- scripts/notify-slack.sh [WPM]
 - scripts/update-claude-wpm.sh [WPM]
 - scripts/update-premium-plugins.sh [WPM]
 - scripts/verify-deploy-zip.sh [REPO]

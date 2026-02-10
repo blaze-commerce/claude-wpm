@@ -397,6 +397,59 @@ After ALL updates complete, you MUST display this visual summary. Copy this exac
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+---
+
+## Slack Notifications (Optional)
+
+After updates complete, WPM can automatically post a changelog summary to Slack.
+
+### Setup
+
+On each Kinsta server, add your Slack webhook URL to `~/.bashrc`:
+
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T.../B.../xxx"
+```
+
+### How It Works
+
+1. After `blz-wpm.sh` or `update-premium-plugins.sh update-all` finishes, the script checks for `SLACK_WEBHOOK_URL`
+2. If set, it reads the **site-level** `CHANGELOG.md` at `$WP_ROOT/CHANGELOG.md` (outside `.claude/`)
+3. Extracts today's entries and posts a summary to Slack via Block Kit
+
+The notification is **completely optional** — if no webhook URL is set, or no changelog exists, it exits silently without affecting the update workflow.
+
+### Standalone Usage
+
+```bash
+# Post today's changelog
+bash .claude/scripts/notify-slack.sh
+
+# Specific date
+bash .claude/scripts/notify-slack.sh -d 2026-02-10
+
+# Custom changelog file
+bash .claude/scripts/notify-slack.sh -f /path/to/CHANGELOG.md
+
+# Override site name
+bash .claude/scripts/notify-slack.sh -s "mysite.com"
+
+# Quiet mode (no stdout)
+bash .claude/scripts/notify-slack.sh -q
+```
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `-d DATE` | Target date (default: today) |
+| `-f FILE` | Path to changelog file (default: `$WP_ROOT/CHANGELOG.md`) |
+| `-s SITE` | Site name override (default: auto-detect via `wp option get siteurl`) |
+| `-w URL` | Webhook URL override (default: `$SLACK_WEBHOOK_URL` env var) |
+| `-q` | Quiet mode — suppress stdout |
+
+---
+
 ### Status Icons Reference
 
 | Icon | Meaning |

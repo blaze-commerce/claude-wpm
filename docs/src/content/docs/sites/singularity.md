@@ -33,12 +33,12 @@ description: Premium plugin inventory for singularitycomputers.com
 | Plugin | Version | License Source | Notes |
 |--------|---------|----------------|-------|
 | elementor-pro | 3.35.0 | Elementor.com | |
-| wordpress-seo-premium | 26.6 | Yoast.com | **🔺 Upload to repo** |
-| perfmatters | 2.5.5 | perfmatters.io | **🔺 Upload to repo** |
+| wordpress-seo-premium | 26.9 | Yoast.com | |
+| perfmatters | 2.5.7 | perfmatters.io | |
 | folders-pro | 3.1.7 | Premio.io | |
-| wpcode-premium | 2.3.2.1 | WPCode.com | **🔺 Upload to repo** |
+| wpcode-premium | 2.3.3 | WPCode.com | |
 | wc-blacklist-manager-premium | 2.3.1.3 | yoohw.com | |
-| newsletter-automated | 4.8.6 | thenewsletterplugin.com | **🔺 Upload to repo** — update to 4.8.8 failed |
+| newsletter-automated | 4.8.8 | thenewsletterplugin.com | |
 | newsletter-extensions | 1.3.9 | thenewsletterplugin.com | |
 | newsletter-wpusers | 1.4.8 | thenewsletterplugin.com | |
 | newsletter-woocommerce | 2.0.1 | thenewsletterplugin.com | |
@@ -64,26 +64,19 @@ description: Premium plugin inventory for singularitycomputers.com
 | revslider-fluiddynamics-addon | 6.7.6 |
 | revslider-transitionpack-addon | 6.7.9 |
 
-### Blaze Commerce Repo (1 plugin)
+### Blaze Commerce Repo (5 plugins)
 
 *Updates via script — manual upload to repo required.*
 
 | Plugin | Version |
 |--------|---------|
 | ajax-search-for-woocommerce-premium | 1.32.2 |
+| perfmatters | 2.5.7 |
+| wordpress-seo-premium | 26.9 |
+| wpcode-premium | 2.3.3 |
+| newsletter-automated | 4.8.8 |
 
 ## Repo Readiness
-
-### Plugins to Upload Before Site Update
-
-These plugins must be added to the Blaze Commerce repo before the next site update can proceed:
-
-| # | Plugin | Current Version | Action Required |
-|---|--------|-----------------|-----------------|
-| 1 | **perfmatters** | 2.5.5 | Upload to repo |
-| 2 | **wordpress-seo-premium** | 26.6 | Upload to repo |
-| 3 | **wpcode-premium** | 2.3.2.1 | Upload to repo |
-| 4 | **newsletter-automated** | 4.8.6 | Upload to repo — failed update to 4.8.8 |
 
 ### Plugins Requiring Client Subscription Access
 
@@ -91,19 +84,23 @@ Lower priority — need to request subscription credentials from client before t
 
 | # | Plugin | Current Version |
 |---|--------|-----------------|
-| 5 | email-verification-for-woocommerce-pro | 2.5.6 |
-| 6 | empty-cart-button-pro-for-woocommerce | 1.3.4 |
-| 7 | conditional-logic-for-woocommerce-product-add-ons-premium | 2.2.2 |
-| 8 | wc-blacklist-manager-premium | 2.3.1.3 |
-| 9 | folders-pro | 3.1.7 |
-| 10 | newsletter-extensions | 1.3.9 |
-| 11 | newsletter-wpusers | 1.4.8 |
-| 12 | newsletter-woocommerce | 2.0.1 |
-| 13 | newsletter-pmpro | 1.1.4 |
+| 1 | email-verification-for-woocommerce-pro | 2.5.6 |
+| 2 | empty-cart-button-pro-for-woocommerce | 1.3.4 |
+| 3 | conditional-logic-for-woocommerce-product-add-ons-premium | 2.2.2 |
+| 4 | wc-blacklist-manager-premium | 2.3.1.3 |
+| 5 | folders-pro | 3.1.7 |
+| 6 | newsletter-extensions | 1.3.9 |
+| 7 | newsletter-wpusers | 1.4.8 |
+| 8 | newsletter-woocommerce | 2.0.1 |
+| 9 | newsletter-pmpro | 1.1.4 |
 
 ### Already in Repo
 
 - ajax-search-for-woocommerce-premium ✓
+- perfmatters ✓
+- wordpress-seo-premium ✓
+- wpcode-premium ✓
+- newsletter-automated ✓
 
 ## Update History
 
@@ -129,3 +126,20 @@ Last maintenance performed: 2026-02-10
 | Plugin | Current | Available | Issue |
 |--------|---------|-----------|-------|
 | newsletter-automated | 4.8.6 | 4.8.8 | Update failed |
+
+### 2026-02-10 — Plugin Updates & Repo Upload
+
+**Updated plugins:**
+
+| Plugin | Old | New |
+|--------|-----|-----|
+| perfmatters | 2.5.5 | 2.5.7 |
+| wordpress-seo-premium | 26.6 | 26.9 |
+| wpcode-premium | 2.3.2.1 | 2.3.3 |
+| newsletter-automated | 4.8.6 | 4.8.8 |
+
+**Added to Blaze Commerce Repo:**
+- perfmatters
+- wordpress-seo-premium
+- wpcode-premium
+- newsletter-automated

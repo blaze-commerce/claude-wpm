@@ -542,6 +542,10 @@ main() {
             enable_maintenance_mode
             update_all
             disable_maintenance_mode
+            # Slack notification (optional — requires SLACK_WEBHOOK_URL)
+            if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+                bash "$(dirname "${BASH_SOURCE[0]}")/notify-slack.sh" -q
+            fi
             ;;
         detect)
             sync_repo

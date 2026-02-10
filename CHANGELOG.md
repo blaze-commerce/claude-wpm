@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.7.0] - 2026-02-10
+
+### Added
+- **Slack changelog notifications** — `scripts/notify-slack.sh` posts site changelog summaries to Slack via webhook
+  - Auto-reads site-level `CHANGELOG.md` (at WP root, outside `.claude/`)
+  - Summarizes sections, counts table rows, preserves bullet points
+  - Slack Block Kit formatting with header, body, and footer
+  - Flags: `-d DATE`, `-f FILE`, `-s SITE`, `-w WEBHOOK_URL`, `-q` quiet mode
+  - No `jq` dependency — uses `jq` if available, falls back to `sed`/`awk`
+  - Graceful failure — exits 0 silently if no webhook or no changelog
+- **Slack integration** in `blz-wpm.sh` and `update-premium-plugins.sh` (guarded by `SLACK_WEBHOOK_URL`)
+- **Slack Notifications** documentation section in `commands/wpm.md`
+
+### Changed
+- **3-tier maintenance mode** — Woo Coming Soon (Priority 1) → ASE Pro (Priority 2) → Custom `.maintenance` (Priority 3)
+
+---
+
 ## [v1.6.0] - 2026-02-05
 
 ### Added

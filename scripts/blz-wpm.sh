@@ -207,3 +207,8 @@ echo "│                                                                     �
 echo "└─────────────────────────────────────────────────────────────────────┘"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Slack notification (optional — requires SLACK_WEBHOOK_URL)
+if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+    bash "$(dirname "${BASH_SOURCE[0]}")/notify-slack.sh" -q
+fi
