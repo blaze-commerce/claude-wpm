@@ -21,14 +21,20 @@ If you need more control:
 
 ### 1. Enable Maintenance Mode
 
-```bash
-# Check if ASE Pro is available
-wp plugin is-active admin-site-enhancements-pro
+Uses a 3-tier priority system:
 
-# If yes, use ASE
+```bash
+# Priority 1: WooCommerce Site Visibility (Coming Soon)
+wp plugin is-active woocommerce
+# If active:
+wp option update woocommerce_coming_soon "yes" --autoload=yes
+
+# Priority 2: ASE Pro (if no WooCommerce)
+wp plugin is-active admin-site-enhancements-pro
+# If active:
 wp option patch update admin_site_enhancements maintenance_mode 1
 
-# If no, use fallback
+# Priority 3: Custom fallback (last resort)
 echo '<?php $upgrading = time(); ?>' > .maintenance
 ```
 
@@ -58,10 +64,13 @@ wp theme update --all
 ### 5. Disable Maintenance Mode
 
 ```bash
+# If using WooCommerce Coming Soon
+wp option update woocommerce_coming_soon "no"
+
 # If using ASE
 wp option patch update admin_site_enhancements maintenance_mode 0
 
-# If using fallback
+# If using custom fallback
 rm .maintenance
 ```
 
@@ -84,11 +93,14 @@ rm .maintenance
 ### Site stuck in maintenance mode
 
 ```bash
-# Remove maintenance file
-rm .maintenance
+# If WooCommerce Coming Soon is stuck on
+wp option update woocommerce_coming_soon "no"
 
-# Or disable ASE maintenance mode
+# If ASE maintenance mode is stuck on
 wp option patch update admin_site_enhancements maintenance_mode 0
+
+# If custom .maintenance file is stuck
+rm .maintenance
 ```
 
 ### Update failed mid-process

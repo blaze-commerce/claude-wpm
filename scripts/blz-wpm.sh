@@ -48,28 +48,37 @@ header('\''Retry-After: 3600'\'');
 
 # ------------------------------------------------------
 # Enable Maintenance Mode
-# Uses ASE Pro if available, otherwise falls back to custom .maintenance
+# Priority: 1) Woo Site Visibility  2) ASE Pro  3) Custom .maintenance
 # ------------------------------------------------------
 enable_maintenance_mode() {
     echo "----------------------------------------"
     echo "Enabling Maintenance Mode..."
     echo "----------------------------------------"
 
-    # Check if ASE Pro is active
-    if wp plugin is-active admin-site-enhancements-pro 2>/dev/null; then
+    # Priority 1: WooCommerce Site Visibility (Coming Soon)
+    if wp plugin is-active woocommerce 2>/dev/null; then
+        echo "WooCommerce detected - using Site Visibility (Coming Soon)"
+        wp option update woocommerce_coming_soon "yes" --autoload=yes 2>/dev/null
+        MAINTENANCE_METHOD="woo"
+        echo "✓ WooCommerce Coming Soon mode enabled"
+
+    # Priority 2: ASE Pro maintenance mode
+    elif wp plugin is-active admin-site-enhancements-pro 2>/dev/null; then
         echo "ASE Pro detected - using ASE maintenance mode"
         wp option patch update admin_site_enhancements maintenance_mode 1
         MAINTENANCE_METHOD="ase"
         echo "✓ ASE Pro maintenance mode enabled"
+
+    # Priority 3: Custom .maintenance fallback
     else
-        echo "ASE Pro not active - using custom maintenance mode"
+        echo "No WooCommerce or ASE Pro - using custom maintenance mode"
         echo ""
         echo "⚠️  WARNING: Custom maintenance mode may not work perfectly with"
         echo "   CDN caching (cached pages may still be visible). For reliable"
-        echo "   maintenance mode on Kinsta/CDN hosts, install ASE Pro."
+        echo "   maintenance mode, use a WooCommerce or ASE Pro site."
         echo ""
 
-        # Create maintenance.php if it doesn't exist
+        # Create maintenance.php if it doesn't exist (relative to WP root)
         if [ ! -f "wp-content/maintenance.php" ]; then
             echo "Creating wp-content/maintenance.php..."
             echo "$MAINTENANCE_PHP" > wp-content/maintenance.php
@@ -93,15 +102,19 @@ disable_maintenance_mode() {
     echo "Disabling Maintenance Mode..."
     echo "----------------------------------------"
 
-    if [ "$MAINTENANCE_METHOD" = "ase" ]; then
+    if [ "$MAINTENANCE_METHOD" = "woo" ]; then
+        wp option update woocommerce_coming_soon "no" 2>/dev/null
+        echo "✓ WooCommerce Coming Soon mode disabled (site is Live)"
+    elif [ "$MAINTENANCE_METHOD" = "ase" ]; then
         wp option patch update admin_site_enhancements maintenance_mode 0
         echo "✓ ASE Pro maintenance mode disabled"
     elif [ "$MAINTENANCE_METHOD" = "custom" ]; then
         rm -f .maintenance
         echo "✓ Custom maintenance mode disabled (maintenance.php kept for future use)"
     else
-        # Fallback: try to disable both just in case
+        # Fallback: try to disable all methods just in case
         echo "Disabling all maintenance modes (safety fallback)..."
+        wp option update woocommerce_coming_soon "no" 2>/dev/null
         wp plugin is-active admin-site-enhancements-pro 2>/dev/null && \
             wp option patch update admin_site_enhancements maintenance_mode 0
         rm -f .maintenance
@@ -160,7 +173,9 @@ echo "┌───────────────────────�
 echo "│                        UPDATE SUMMARY                               │"
 echo "├─────────────────────────────────────────────────────────────────────┤"
 echo "│                                                                     │"
-if [ "$MAINTENANCE_METHOD" = "ase" ]; then
+if [ "$MAINTENANCE_METHOD" = "woo" ]; then
+    echo "│  🔒 Maintenance Mode    Woo Coming Soon enabled → disabled          │"
+elif [ "$MAINTENANCE_METHOD" = "ase" ]; then
     echo "│  🔒 Maintenance Mode    ASE Pro enabled → disabled                  │"
 else
     echo "│  🔒 Maintenance Mode    Custom (.maintenance) enabled → disabled    │"

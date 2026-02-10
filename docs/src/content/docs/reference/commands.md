@@ -24,18 +24,20 @@ The primary command for WordPress maintenance tasks.
 
 ### Maintenance Mode
 
-Two-tier approach for maximum compatibility:
+Three-tier priority system for maximum compatibility across all sites:
 
-| Method | When Used | How It Works |
-|--------|-----------|--------------|
-| **ASE Pro** (preferred) | Plugin is active | Uses ASE maintenance mode option |
-| **Custom fallback** | ASE Pro not available | Creates `.maintenance` file |
+| Priority | Method | When Used | How It Works |
+|----------|--------|-----------|--------------|
+| 1 | **Woo Site Visibility** | WooCommerce is active | Sets Coming Soon mode via `woocommerce_coming_soon` option |
+| 2 | **ASE Pro** | No WooCommerce, ASE Pro active | Uses ASE maintenance mode option |
+| 3 | **Custom fallback** | Neither available | Creates `.maintenance` file |
 
 ### Important Notes
 
 - Never skip maintenance mode on WooCommerce sites
 - Always disable maintenance mode after updates, even if updates fail
-- ASE Pro method works properly with Kinsta CDN
+- Woo Site Visibility and ASE Pro both work properly with Kinsta CDN
+- Custom `.maintenance` may not bypass CDN caching
 
 ## /init - Initialize Site
 

@@ -10,7 +10,25 @@ Execute these commands in sequence:
 
 **NEVER skip this step** - WooCommerce sites can have failed orders during updates.
 
-First, check if ASE Pro is active:
+Maintenance mode uses a 3-tier priority system. Check in order:
+
+#### Priority 1: WooCommerce Site Visibility (Coming Soon)
+
+```bash
+wp plugin is-active woocommerce
+```
+
+**If WooCommerce is active (exit code 0):**
+```bash
+wp option update woocommerce_coming_soon "yes" --autoload=yes
+```
+Remember: `MAINTENANCE_METHOD="woo"`
+
+This sets the site to **Coming Soon** mode via WooCommerce → Settings → Site Visibility. Native, CDN-friendly, no extra plugin needed.
+
+#### Priority 2: ASE Pro Maintenance Mode
+
+Only if WooCommerce is NOT active:
 ```bash
 wp plugin is-active admin-site-enhancements-pro
 ```
@@ -21,7 +39,9 @@ wp option patch update admin_site_enhancements maintenance_mode 1
 ```
 Remember: `MAINTENANCE_METHOD="ase"`
 
-**If ASE Pro is NOT active (exit code 1), use custom fallback:**
+#### Priority 3: Custom .maintenance Fallback
+
+Only if neither WooCommerce nor ASE Pro is active.
 
 First, create `wp-content/maintenance.php` if it doesn't exist:
 ```php
@@ -71,7 +91,7 @@ Remember: `MAINTENANCE_METHOD="custom"`
 ```
 ⚠️  WARNING: Using custom maintenance mode. This may not work perfectly
     with CDN caching (cached pages may still be visible). For reliable
-    maintenance mode on Kinsta/CDN hosts, install ASE Pro.
+    maintenance mode, use a WooCommerce or ASE Pro site.
 ```
 
 ---
@@ -119,6 +139,12 @@ wp theme update --all
 ### 6. Disable Maintenance Mode (REQUIRED)
 
 **Always disable maintenance mode after updates complete, even if updates failed/errored.**
+
+**If WooCommerce Coming Soon was used (`MAINTENANCE_METHOD="woo"`):**
+```bash
+wp option update woocommerce_coming_soon "no"
+```
+This sets the site back to **Live** via WooCommerce Site Visibility.
 
 **If ASE Pro was used (`MAINTENANCE_METHOD="ase"`):**
 ```bash
@@ -272,8 +298,9 @@ After completing all tasks, remind the user:
 ## Important: Maintenance Mode Notes
 
 - **NEVER skip maintenance mode** - WooCommerce sites can have failed orders during updates
-- **ASE Pro is preferred** because it works properly with Kinsta CDN
-- The custom `.maintenance` method has limitations on CDN-cached sites (frontend may show cached pages while wp-admin shows maintenance)
+- **Priority 1: WooCommerce Site Visibility** (Coming Soon) — native, CDN-friendly, works on all WooCommerce sites
+- **Priority 2: ASE Pro** — for non-WooCommerce sites that have ASE Pro installed
+- **Priority 3: Custom `.maintenance`** — last resort, has limitations on CDN-cached sites (frontend may show cached pages)
 - **Always verify** maintenance mode is disabled after updates complete
 - **If update fails/errors**, still disable maintenance mode before stopping
 
@@ -290,7 +317,7 @@ After ALL updates complete, you MUST display this visual summary. Copy this exac
 │                        UPDATE SUMMARY                               │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│  🔒 Maintenance Mode    [METHOD] enabled → disabled                 │
+│  🔒 Maintenance Mode    [METHOD: woo/ase/custom] enabled → disabled  │
 │                                                                     │
 │  ⬆️  WordPress Core      [OLD_VERSION] → [NEW_VERSION]              │
 │  🗄️  Database            [STATUS - updated/already latest]          │
