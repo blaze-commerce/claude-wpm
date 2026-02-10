@@ -14,9 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Auto-reads site-level `CHANGELOG.md` (at WP root, outside `.claude/`)
   - Summarizes sections, counts table rows, preserves bullet points
   - Slack Block Kit formatting with header, body, and footer
-  - Flags: `-d DATE`, `-f FILE`, `-s SITE`, `-w WEBHOOK_URL`, `-q` quiet mode
+  - Flags: `-d DATE`, `-e MSG`, `-f FILE`, `-s SITE`, `-w WEBHOOK_URL`, `-q` quiet mode
   - No `jq` dependency — uses `jq` if available, falls back to `sed`/`awk`
   - Graceful failure — exits 0 silently if no webhook or no changelog
+- **Slack error alerts** — `-e` flag sends error messages to Slack when scripts fail
+  - `ERR` traps in `blz-wpm.sh` and `update-premium-plugins.sh` auto-post on failure
+  - Includes script name, line number, and exit code
+  - Auto-disables maintenance mode as safety fallback
 - **Slack integration** in `blz-wpm.sh` and `update-premium-plugins.sh` (guarded by `SLACK_WEBHOOK_URL`)
 - **Slack Notifications** documentation section in `commands/wpm.md`
 

@@ -7,6 +7,21 @@
 # From Blaze Commerce – maintained by jarutosurano
 # ------------------------------------------------------
 
+# Auto-detect script directory for sibling script calls
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Error trap — send Slack alert on failure, then ensure maintenance mode is disabled
+on_error() {
+    local exit_code=$?
+    local line_no=$1
+    if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+        bash "$SCRIPT_DIR/notify-slack.sh" -q -e "blz-wpm.sh failed at line ${line_no} (exit code ${exit_code})"
+    fi
+    # Safety: always try to disable maintenance mode on failure
+    disable_maintenance_mode 2>/dev/null || true
+}
+trap 'on_error ${LINENO}' ERR
+
 # Track which maintenance method is used
 MAINTENANCE_METHOD=""
 
@@ -210,5 +225,5 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 # Slack notification (optional — requires SLACK_WEBHOOK_URL)
 if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
-    bash "$(dirname "${BASH_SOURCE[0]}")/notify-slack.sh" -q
+    bash "$SCRIPT_DIR/notify-slack.sh" -q
 fi

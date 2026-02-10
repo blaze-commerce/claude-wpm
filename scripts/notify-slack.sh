@@ -8,6 +8,10 @@
 # Reads the SITE-LEVEL CHANGELOG.md (at WP root, outside .claude/)
 # and posts a summary of today's entries to Slack.
 #
+# Modes:
+#   Changelog mode (default) — reads site CHANGELOG.md, posts summary
+#   Error mode (-e)          — posts a red error alert to Slack
+#
 # Usage:
 #   bash notify-slack.sh                     # Auto-detect everything
 #   bash notify-slack.sh -d 2026-02-10       # Specific date
@@ -15,6 +19,7 @@
 #   bash notify-slack.sh -s "mysite.com"      # Override site name
 #   bash notify-slack.sh -w "https://..."     # Override webhook URL
 #   bash notify-slack.sh -q                   # Quiet mode (no stdout)
+#   bash notify-slack.sh -e "Plugin update failed: elementor-pro"
 #
 # Environment:
 #   SLACK_WEBHOOK_URL  - Slack incoming webhook URL (required)
@@ -33,17 +38,19 @@ CHANGELOG_FILE="$WP_ROOT/CHANGELOG.md"
 SITE_NAME=""
 WEBHOOK_URL="${SLACK_WEBHOOK_URL:-}"
 QUIET=false
+ERROR_MSG=""
 
 # WPM version (read from VERSION file if available)
 WPM_VERSION=""
 if [ -f "$SCRIPT_DIR/../VERSION" ]; then
-    WPM_VERSION="$(cat "$SCRIPT_DIR/../VERSION" 2>/dev/null | tr -d '[:space:]')"
+    WPM_VERSION="$(tr -d '[:space:]' < "$SCRIPT_DIR/../VERSION" 2>/dev/null)"
 fi
 
 # Parse flags
-while getopts "d:f:s:w:q" opt; do
+while getopts "d:e:f:s:w:q" opt; do
     case $opt in
         d) TARGET_DATE="$OPTARG" ;;
+        e) ERROR_MSG="$OPTARG" ;;
         f) CHANGELOG_FILE="$OPTARG" ;;
         s) SITE_NAME="$OPTARG" ;;
         w) WEBHOOK_URL="$OPTARG" ;;
@@ -60,15 +67,34 @@ log() {
 }
 
 # ------------------------------------------------------
-# Graceful exit: no webhook or no changelog = silent success
+# Escape JSON special characters
+# Uses jq if available, otherwise sed/awk fallback
+# ------------------------------------------------------
+json_escape() {
+    local text="$1"
+    if command -v jq &> /dev/null; then
+        echo -n "$text" | jq -Rs '.'
+    else
+        # Manual escape: backslash, quotes, newlines, tabs
+        echo -n "$text" | awk '
+        BEGIN { ORS="" }
+        {
+            gsub(/\\/, "\\\\")
+            gsub(/"/, "\\\"")
+            gsub(/\t/, "\\t")
+            if (NR > 1) printf "\\n"
+            print
+        }
+        END { }
+        ' | sed 's/^/"/;s/$/"/'
+    fi
+}
+
+# ------------------------------------------------------
+# Graceful exit: no webhook = silent success
 # ------------------------------------------------------
 if [ -z "$WEBHOOK_URL" ]; then
     log "[slack] No SLACK_WEBHOOK_URL set — skipping notification"
-    exit 0
-fi
-
-if [ ! -f "$CHANGELOG_FILE" ]; then
-    log "[slack] No changelog found at $CHANGELOG_FILE — skipping"
     exit 0
 fi
 
@@ -84,6 +110,71 @@ if [ -z "$SITE_NAME" ]; then
     if [ -z "$SITE_NAME" ]; then
         SITE_NAME="$(hostname -f 2>/dev/null || hostname)"
     fi
+fi
+
+# ------------------------------------------------------
+# Error alert mode — skip changelog, post error directly
+# ------------------------------------------------------
+if [ -n "$ERROR_MSG" ]; then
+    log "[slack] Posting error alert for $SITE_NAME..."
+
+    FOOTER="Claude WPM"
+    if [ -n "$WPM_VERSION" ]; then
+        FOOTER="Claude WPM v${WPM_VERSION}"
+    fi
+    FOOTER="${FOOTER} | Blaze Commerce"
+
+    ESCAPED_ERROR="$(json_escape "$ERROR_MSG")"
+
+    ERROR_PAYLOAD="{
+      \"blocks\": [
+        {
+          \"type\": \"header\",
+          \"text\": {
+            \"type\": \"plain_text\",
+            \"text\": \"\\u26a0\\ufe0f ${SITE_NAME} \\u2014 Script Error\",
+            \"emoji\": true
+          }
+        },
+        {
+          \"type\": \"section\",
+          \"text\": {
+            \"type\": \"mrkdwn\",
+            \"text\": ${ESCAPED_ERROR}
+          }
+        },
+        {
+          \"type\": \"context\",
+          \"elements\": [
+            {
+              \"type\": \"mrkdwn\",
+              \"text\": \"${FOOTER} | ${TARGET_DATE}\"
+            }
+          ]
+        }
+      ]
+    }"
+
+    HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        -d "$ERROR_PAYLOAD" \
+        "$WEBHOOK_URL" 2>/dev/null)" || true
+
+    if [ "$HTTP_CODE" = "200" ]; then
+        log "[slack] Error alert posted successfully"
+    else
+        log "[slack] Warning: Slack returned HTTP $HTTP_CODE (non-fatal)"
+    fi
+    exit 0
+fi
+
+# ------------------------------------------------------
+# Changelog mode — read changelog file
+# ------------------------------------------------------
+if [ ! -f "$CHANGELOG_FILE" ]; then
+    log "[slack] No changelog found at $CHANGELOG_FILE — skipping"
+    exit 0
 fi
 
 # ------------------------------------------------------
@@ -198,30 +289,6 @@ SUMMARY="$(summarize "$ENTRIES")"
 if [ ${#SUMMARY} -gt 2800 ]; then
     SUMMARY="${SUMMARY:0:2797}..."
 fi
-
-# ------------------------------------------------------
-# Escape JSON special characters
-# Uses jq if available, otherwise sed/awk fallback
-# ------------------------------------------------------
-json_escape() {
-    local text="$1"
-    if command -v jq &> /dev/null; then
-        echo -n "$text" | jq -Rs '.'
-    else
-        # Manual escape: backslash, quotes, newlines, tabs
-        echo -n "$text" | awk '
-        BEGIN { ORS="" }
-        {
-            gsub(/\\/, "\\\\")
-            gsub(/"/, "\\\"")
-            gsub(/\t/, "\\t")
-            if (NR > 1) printf "\\n"
-            print
-        }
-        END { }
-        ' | sed 's/^/"/;s/$/"/'
-    fi
-}
 
 # ------------------------------------------------------
 # Build Slack Block Kit payload

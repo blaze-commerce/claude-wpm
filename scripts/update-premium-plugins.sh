@@ -8,6 +8,21 @@
 
 set -e
 
+# Error trap — send Slack alert on failure, then ensure maintenance mode is disabled
+on_error() {
+    local exit_code=$?
+    local line_no=$1
+    if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+        bash "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/notify-slack.sh" -q \
+            -e "update-premium-plugins.sh failed at line ${line_no} (exit code ${exit_code})"
+    fi
+    # Safety: always try to disable maintenance mode on failure
+    if [ -n "${MAINTENANCE_METHOD:-}" ]; then
+        disable_maintenance_mode 2>/dev/null || true
+    fi
+}
+trap 'on_error ${LINENO}' ERR
+
 # Configuration
 REPO_URL="${PREMIUM_PLUGINS_REPO:-git@github.com:blaze-commerce/wp-premium-plugins.git}"
 REPO_BRANCH="${PREMIUM_PLUGINS_BRANCH:-main}"
@@ -544,7 +559,7 @@ main() {
             disable_maintenance_mode
             # Slack notification (optional — requires SLACK_WEBHOOK_URL)
             if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
-                bash "$(dirname "${BASH_SOURCE[0]}")/notify-slack.sh" -q
+                bash "$SCRIPT_DIR/notify-slack.sh" -q
             fi
             ;;
         detect)

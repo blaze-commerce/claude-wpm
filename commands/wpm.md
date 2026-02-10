@@ -413,9 +413,16 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T.../B.../xxx"
 
 ### How It Works
 
+**Changelog mode (default):**
 1. After `blz-wpm.sh` or `update-premium-plugins.sh update-all` finishes, the script checks for `SLACK_WEBHOOK_URL`
 2. If set, it reads the **site-level** `CHANGELOG.md` at `$WP_ROOT/CHANGELOG.md` (outside `.claude/`)
 3. Extracts today's entries and posts a summary to Slack via Block Kit
+
+**Error alert mode (`-e`):**
+- Both scripts have an `ERR` trap that automatically posts a Slack error alert if any command fails
+- Includes the script name, line number, and exit code
+- Also auto-disables maintenance mode as a safety measure
+- No manual setup needed — if `SLACK_WEBHOOK_URL` is set, error alerts are automatic
 
 The notification is **completely optional** — if no webhook URL is set, or no changelog exists, it exits silently without affecting the update workflow.
 
@@ -434,6 +441,9 @@ bash .claude/scripts/notify-slack.sh -f /path/to/CHANGELOG.md
 # Override site name
 bash .claude/scripts/notify-slack.sh -s "mysite.com"
 
+# Post an error alert
+bash .claude/scripts/notify-slack.sh -e "Plugin update failed: elementor-pro"
+
 # Quiet mode (no stdout)
 bash .claude/scripts/notify-slack.sh -q
 ```
@@ -443,6 +453,7 @@ bash .claude/scripts/notify-slack.sh -q
 | Flag | Description |
 |------|-------------|
 | `-d DATE` | Target date (default: today) |
+| `-e MSG` | Error alert mode — posts error message instead of changelog |
 | `-f FILE` | Path to changelog file (default: `$WP_ROOT/CHANGELOG.md`) |
 | `-s SITE` | Site name override (default: auto-detect via `wp option get siteurl`) |
 | `-w URL` | Webhook URL override (default: `$SLACK_WEBHOOK_URL` env var) |
