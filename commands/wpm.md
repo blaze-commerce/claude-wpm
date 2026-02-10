@@ -286,6 +286,20 @@ Show brief confirmation:
 
 ---
 
+## Post to Slack (Final Step)
+
+After writing the site's `CHANGELOG.md`, post the summary to Slack as the **very last step**:
+
+```bash
+bash .claude/scripts/notify-slack.sh
+```
+
+This reads today's entries from `$WP_ROOT/CHANGELOG.md` and posts to Slack. Only fires if `SLACK_WEBHOOK_URL` is set — safe to run always.
+
+**Important:** This must run AFTER you've written the CHANGELOG, not before. The auto-triggers in the update scripts are a safety net for re-runs, but the primary notification should happen here.
+
+---
+
 ## Final Reminders
 
 After completing all tasks, remind the user:

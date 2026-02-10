@@ -68,7 +68,9 @@ Claude Code configuration for WordPress/WooCommerce projects. This repository co
 │   ├── blz-wpm.sh          # Direct SSH maintenance script (with maintenance mode)
 │   ├── check-version.sh    # Check for updates
 │   ├── create-deploy-zip.sh # Build deployment package [REPO]
+│   ├── notify-slack.sh      # Post changelog/error alerts to Slack
 │   ├── update-claude-wpm.sh # Auto-update from GitHub releases
+│   ├── update-premium-plugins.sh # Premium plugin updates via private repo
 │   └── verify-deploy-zip.sh # QA check before release [REPO]
 ├── settings.json           # Permissions and hook configuration
 │
@@ -306,16 +308,17 @@ Invoke with `/skill-name`:
 ### Commands
 - `/wpm` - WordPress Maintenance (updates core, plugins, themes with mandatory maintenance mode)
 
-### Maintenance Mode (NEW)
+### Maintenance Mode
 
-The `/wpm` command now **requires** maintenance mode before and after updates to prevent issues on WooCommerce sites (failed orders, broken checkout).
+The `/wpm` command **requires** maintenance mode before and after updates to prevent issues on WooCommerce sites (failed orders, broken checkout).
 
-**Two-Tier Approach:**
+**3-Tier Priority System:**
 
-| Method | When Used | How It Works |
-|--------|-----------|--------------|
-| **ASE Pro** (preferred) | Plugin is active | `wp option patch update admin_site_enhancements maintenance_mode 1` |
-| **Custom fallback** | ASE Pro not available | Creates `.maintenance` file in site root |
+| Priority | Method | When Used | How It Works |
+|----------|--------|-----------|--------------|
+| 1 | **WooCommerce Coming Soon** | WooCommerce is active | `wp option update woocommerce_coming_soon "yes"` |
+| 2 | **ASE Pro** | No WooCommerce, ASE Pro active | `wp option patch update admin_site_enhancements maintenance_mode 1` |
+| 3 | **Custom fallback** | Neither available | Creates `.maintenance` file in site root |
 
 **Update Flow:**
 ```
@@ -325,7 +328,7 @@ The `/wpm` command now **requires** maintenance mode before and after updates to
 │                                                                     │
 │  Step 0: ENABLE MAINTENANCE MODE (REQUIRED)                         │
 │  ───────────────────────────────────────────                        │
-│  Check ASE Pro → Use ASE method OR custom .maintenance fallback     │
+│  Woo Coming Soon → ASE Pro → Custom .maintenance                   │
 │                                                                     │
 │  Steps 1-5: UPDATES                                                 │
 │  ──────────────────                                                 │
@@ -341,8 +344,10 @@ The `/wpm` command now **requires** maintenance mode before and after updates to
 │                                                                     │
 │  Step 7: VERIFY & CLEANUP                                           │
 │  ────────────────────────                                           │
-│  - Verify site accessible (incognito browser)                       │
+│  - Write site CHANGELOG.md with all changes                        │
+│  - Post to Slack (notify-slack.sh)                                  │
 │  - Update plugin inventory in CLAUDE.md                             │
+│  - Verify site accessible (incognito browser)                       │
 │  - Clear Kinsta cache (manually via dashboard)                      │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -350,9 +355,27 @@ The `/wpm` command now **requires** maintenance mode before and after updates to
 
 **Important Notes:**
 - **Never skip maintenance mode** - WooCommerce sites can have failed orders during updates
-- **ASE Pro is preferred** - Works properly with Kinsta CDN
+- **WooCommerce Coming Soon is preferred** - Native, CDN-friendly, no extra plugin needed
 - **Custom fallback limitation** - CDN-cached pages may still be visible to visitors
 - **Always disable** maintenance mode after updates, even if updates failed
+
+### Slack Notifications (Optional)
+
+After updates complete, WPM can post a changelog summary to Slack.
+
+**Setup:** On each Kinsta server, add to `~/.bashrc`:
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/T.../B.../xxx"
+```
+
+**How it works:**
+1. Claude runs updates and writes the site's `CHANGELOG.md`
+2. Claude runs `notify-slack.sh` as the final step
+3. Script reads today's entries and posts a summary to Slack
+
+**Error alerts:** Both `blz-wpm.sh` and `update-premium-plugins.sh` have `ERR` traps that auto-post to Slack if any command fails, including script name, line number, and exit code.
+
+**Completely optional** — if `SLACK_WEBHOOK_URL` isn't set, nothing happens. See [wpm.md](commands/wpm.md) for full documentation.
 
 ---
 
