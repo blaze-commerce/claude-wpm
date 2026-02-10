@@ -43,7 +43,7 @@ ERROR_MSG=""
 # WPM version (read from VERSION file if available)
 WPM_VERSION=""
 if [ -f "$SCRIPT_DIR/../VERSION" ]; then
-    WPM_VERSION="$(tr -d '[:space:]' < "$SCRIPT_DIR/../VERSION" 2>/dev/null)"
+    WPM_VERSION="$(tr -d '[:space:]' < "$SCRIPT_DIR/../VERSION" 2>/dev/null | sed 's/^v//')"
 fi
 
 # Parse flags
@@ -309,7 +309,7 @@ PAYLOAD="{
       \"type\": \"header\",
       \"text\": {
         \"type\": \"plain_text\",
-        \"text\": \"\\ud83d\\udccb ${SITE_NAME} \\u2014 ${TARGET_DATE}\",
+        \"text\": \"\\ud83e\\udec6 ${SITE_NAME} \\u2014 ${TARGET_DATE}\",
         \"emoji\": true
       }
     },
