@@ -10,3 +10,4 @@ Overview of all WordPress sites managed with Claude WPM.
 | [beaufortanimalsupplies.com.au](/claude-wpm/sites/beaufort/) | 13 | 2026-02-09 |
 | [dancewear.co.uk](/claude-wpm/sites/dancewear/) | 17 | 2026-02-04 |
 | [shinetrim.com](/claude-wpm/sites/shinetrim/) | 12 | 2026-02-04 |
+| [singularitycomputers.com](/claude-wpm/sites/singularity/) | 31 | 2026-02-10 |
