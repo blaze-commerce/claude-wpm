@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v1.7.1] - 2026-02-10
+
+### Fixed
+- Slack header emoji changed to saluting face (U+1FAC6)
+- Fixed double `v` in Slack footer (`vv1.7.0` → `v1.7.1`)
+
+### Added
+- "Post to Slack" as final step in `/wpm` workflow (after CHANGELOG write)
+- Slack Notifications section in README.md
+- `notify-slack.sh` and `update-premium-plugins.sh` in README file tree
+
+### Changed
+- Updated README maintenance mode docs to 3-tier system
+
+---
+
 ## [v1.7.0] - 2026-02-10
 
 ### Added
