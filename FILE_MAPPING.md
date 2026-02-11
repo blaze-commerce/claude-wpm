@@ -97,6 +97,7 @@ All files in this repository with their deployment category:
 - docs/src/content/docs/sites/shinetrim.md [WPM-QA]
 - docs/src/content/docs/sites/singularity.md [WPM-QA]
 - docs/src/content/docs/sites/thebutchersdog.md [WPM-QA]
+- docs/src/content/docs/sites/wildbrumby.md [WPM-QA]
 - docs/src/env.d.ts [WPM-QA]
 - docs/src/styles/custom.css [WPM-QA]
 - docs/src/styles/global.css [WPM-QA]
