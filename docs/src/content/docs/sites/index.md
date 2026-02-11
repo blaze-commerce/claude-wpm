@@ -11,3 +11,4 @@ Overview of all WordPress sites managed with Claude WPM.
 | [dancewear.co.uk](/claude-wpm/sites/dancewear/) | 17 | 2026-02-04 |
 | [shinetrim.com](/claude-wpm/sites/shinetrim/) | 12 | 2026-02-04 |
 | [singularitycomputers.com](/claude-wpm/sites/singularity/) | 31 | 2026-02-10 |
+| [thebutchersdog.com.au](/claude-wpm/sites/thebutchersdog/) | 13 | 2026-02-10 |
