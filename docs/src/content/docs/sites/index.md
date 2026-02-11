@@ -11,6 +11,7 @@ Overview of all WordPress sites managed with Claude WPM.
 | [birdbusta.net](/claude-wpm/sites/birdbusta/) | 5 | 2026-02-10 |
 | [dancewear.co.uk](/claude-wpm/sites/dancewear/) | 17 | 2026-02-04 |
 | [shinetrim.com](/claude-wpm/sites/shinetrim/) | 12 | 2026-02-04 |
+| [nazarrugs.com.au](/claude-wpm/sites/nazarrugs/) | 6 | 2026-02-10 |
 | [singularitycomputers.com](/claude-wpm/sites/singularity/) | 31 | 2026-02-10 |
 | [thebutchersdog.com.au](/claude-wpm/sites/thebutchersdog/) | 13 | 2026-02-10 |
 | [wildbrumby.com](/claude-wpm/sites/wildbrumby/) | 3 | 2026-02-10 |
