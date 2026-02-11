@@ -96,6 +96,7 @@ All files in this repository with their deployment category:
 - docs/src/content/docs/sites/dancewear.md [WPM-QA]
 - docs/src/content/docs/sites/index.md [WPM-QA]
 - docs/src/content/docs/sites/nazarrugs.md [WPM-QA]
+- docs/src/content/docs/sites/saffars.md [WPM-QA]
 - docs/src/content/docs/sites/shinetrim.md [WPM-QA]
 - docs/src/content/docs/sites/singularity.md [WPM-QA]
 - docs/src/content/docs/sites/thebutchersdog.md [WPM-QA]
