@@ -100,6 +100,7 @@ All files in this repository with their deployment category:
 - docs/src/content/docs/sites/saffars.md [WPM-QA]
 - docs/src/content/docs/sites/shinetrim.md [WPM-QA]
 - docs/src/content/docs/sites/singularity.md [WPM-QA]
+- docs/src/content/docs/sites/stkildadentist.md [WPM-QA]
 - docs/src/content/docs/sites/thebutchersdog.md [WPM-QA]
 - docs/src/content/docs/sites/wildbrumby.md [WPM-QA]
 - docs/src/env.d.ts [WPM-QA]
