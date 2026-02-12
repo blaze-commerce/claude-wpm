@@ -15,5 +15,6 @@ Overview of all WordPress sites managed with Claude WPM.
 | [pegasushealthcare.com.au](/claude-wpm/sites/pegasus/) | 10 | 2026-02-10 |
 | [saffarsfinerugs.com.au](/claude-wpm/sites/saffars/) | 4 | 2026-02-10 |
 | [singularitycomputers.com](/claude-wpm/sites/singularity/) | 31 | 2026-02-10 |
+| [stkildadentist.com.au](/claude-wpm/sites/stkildadentist/) | 2 | 2026-02-10 |
 | [thebutchersdog.com.au](/claude-wpm/sites/thebutchersdog/) | 13 | 2026-02-10 |
 | [wildbrumby.com](/claude-wpm/sites/wildbrumby/) | 3 | 2026-02-10 |
