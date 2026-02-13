@@ -8,6 +8,7 @@ Overview of all WordPress sites managed with Claude WPM.
 | Site | Premium Plugins | Last Updated |
 |------|-----------------|--------------|
 | [blazecommerce.io](/claude-wpm/sites/blazecommerce/) | 0 | 2026-02-12 |
+| [byronbaycandlessitebuild.kinsta.cloud](/claude-wpm/sites/byronbaycandles/) | 6 | 2026-02-12 |
 | [beaufortanimalsupplies.com.au](/claude-wpm/sites/beaufort/) | 13 | 2026-02-09 |
 | [birdbusta.net](/claude-wpm/sites/birdbusta/) | 5 | 2026-02-10 |
 | [dancewear.co.uk](/claude-wpm/sites/dancewear/) | 17 | 2026-02-04 |
